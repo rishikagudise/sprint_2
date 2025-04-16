@@ -234,6 +234,14 @@ document.body.addEventListener("click", (event) => {
   }
 });
 
+// Close modal when clicking on the background for Add Alumni Profile Modal
+r_e("add_modal").addEventListener("click", (e) => {
+  if (e.target.classList.contains("modal-background")) {
+    r_e("add_modal").classList.remove("is-active");
+    r_e("alumni_form").reset();
+  }
+});
+
 // Update Calendar
 let currentDate = new Date();
 let events = {};
