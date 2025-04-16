@@ -112,6 +112,13 @@ r_e("sign_up_form").addEventListener("submit", async (e) => {
     return; // Return to stop further execution
   }
 
+  // Close modal when clicking on the background for Sign Up
+r_e("smodal").addEventListener("click", (e) => {
+  if (e.target.classList.contains("modal-background")) {
+    r_e("smodal").classList.remove("is-active");
+  }
+});
+  
   // Reset the form (double check the form ID)
   r_e("sign_up_form").reset();
 });
@@ -185,6 +192,13 @@ r_e("signoutbtn").addEventListener("click", () => {
       location.reload();
     }, 3000);
   });
+});
+
+// Close modal when clicking on the background for Sign In
+r_e("smodal2").addEventListener("click", (e) => {
+  if (e.target.classList.contains("modal-background")) {
+    r_e("smodal2").classList.remove("is-active");
+  }
 });
 
 // //on auth state change
