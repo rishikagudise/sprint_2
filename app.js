@@ -111,16 +111,14 @@ r_e("sign_up_form").addEventListener("submit", async (e) => {
     r_e("sign_up_form").reset();
     return; // Return to stop further execution
   }
+});
 
-  // Close modal when clicking on the background for Sign Up
+// Close modal when clicking on the background for Sign Up
 r_e("smodal").addEventListener("click", (e) => {
   if (e.target.classList.contains("modal-background")) {
     r_e("smodal").classList.remove("is-active");
+    r_e("sign_up_form").reset();
   }
-});
-  
-  // Reset the form (double check the form ID)
-  r_e("sign_up_form").reset();
 });
 
 // User Sign In
@@ -198,6 +196,7 @@ r_e("signoutbtn").addEventListener("click", () => {
 r_e("smodal2").addEventListener("click", (e) => {
   if (e.target.classList.contains("modal-background")) {
     r_e("smodal2").classList.remove("is-active");
+    r_e("sign_in_form").reset();
   }
 });
 
@@ -206,7 +205,7 @@ auth.onAuthStateChanged((user) => {
   if (user) {
     // when signed in, sign up/in buttons disappear and sign out button appears
     r_e("signupbtn").classList.add("is-hidden");
-    r_e("loginbtn").classList.add("is-hidden");
+    r_e("signinbtn").classList.add("is-hidden");
     r_e("signoutbtn").classList.remove("is-hidden");
   }
 });
@@ -221,7 +220,7 @@ signupbtn.addEventListener("click", () => {
 });
 
 // Sign-In Modal Functionality
-let signinbtn = document.querySelector("#loginbtn");
+let signinbtn = document.querySelector("#signinbtn");
 signinbtn.addEventListener("click", () => {
   let sign_in_modal = document.querySelector("#smodal2");
   sign_in_modal.classList.add("is-active");
@@ -386,7 +385,7 @@ function loadPage(page) {
         background-color: #ee9ca7;
       }
 
-      .custom_login:hover {
+      .custom_signin:hover {
         background-color: rgb(177, 168, 168);
       }
 
