@@ -22,39 +22,6 @@ function configure_message_bar(msg) {
   }, 3000);
 }
 
-document
-  .querySelector("#add_profile_submit_btn")
-  .addEventListener("click", (event) => {
-    event.preventDefault();
-
-    // Gather other information
-    let f_name = document.querySelector("#first_name").value;
-    let l_name = document.querySelector("#last_name").value;
-    let company = document.querySelector("#company_name").value;
-    let position = document.querySelector("#position_name").value;
-    let industry = document.querySelector("#industry_name").value;
-
-    // Create a new profile card
-    let alumCard = document.createElement("div");
-    alumCard.classList.add("profile-card");
-    alumCard.setAttribute("onclick", "loadPage('expanded')");
-
-    alumCard.innerHTML = `
-      <img src="test.jpg" class="profile-img" alt="Profile Image" />
-      <h3>${f_name} ${l_name}</h3>
-      <p>${company}</p>
-      <p>${position}</p>
-      <p>${industry}</p>
-  `;
-
-    // Append the card to the carousel
-    document.querySelector("#carousel").appendChild(alumCard);
-
-    // Reset the form after submitting
-    document.querySelector("#alumni_form").reset();
-    document.querySelector("#add_modal").classList.remove("is-active");
-  });
-
 //this requires the firebase database!
 const add_alum_profile = (
   f_name,
@@ -232,6 +199,69 @@ document.body.addEventListener("click", (event) => {
     let addProfileModal = document.querySelector("#add_modal");
     addProfileModal.classList.add("is-active");
   }
+});
+
+r_e("alumni_form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  let first_name = r_e("alum_first_name").value;
+  let last_name = r_e("alum_last_name").value;
+  let company = r_e("alum_company").value;
+  let position = r_e("alum_position").value;
+  let major = r_e("alum_major").value;
+  let industry = r_e("alum_industry").value;
+  let degree = r_e("alum_degree").value;
+  let city = r_e("alum_city").value;
+  let state = r_e("alum_state").value;
+  let grad_yr = r_e("alum_grad_yr").value;
+  let email = r_e("alum_email").value;
+  let linkedin = r_e("alum_linkedin").value;
+
+  let alum_obj = {
+    first_name: first_name,
+    last_name: last_name,
+    company: company,
+    current_position: position,
+    major: major,
+    industry,
+    industry,
+    degree: degree,
+    city: city,
+    state: state,
+    graduation_year: grad_yr,
+    contact_info: {
+      email: email,
+      linkedin: linkedin,
+    },
+  };
+
+  //actually inserting into the db collection - alumni!!!
+  try {
+    await db.collection("Alumni").add(alum_obj);
+  } catch (error) {
+    alert(`${error}`);
+    return;
+  }
+  r_e("alumni_form").reset();
+
+  // Create a new profile card
+  let alumCard = document.createElement("div");
+  alumCard.classList.add("profile-card");
+  alumCard.setAttribute("onclick", "loadPage('expanded')");
+
+  alumCard.innerHTML = `
+    <img src="test.jpg" class="profile-img" alt="Profile Image" />
+    <h3>${first_name} ${last_name}</h3>
+    <p>${company}</p>
+    <p>${position}</p>
+    <p>${industry}</p>
+`;
+
+  // Append the card to the carousel
+  document.querySelector("#carousel").appendChild(alumCard);
+
+  // Reset the form after submitting
+  document.querySelector("#alumni_form").reset();
+  document.querySelector("#add_modal").classList.remove("is-active");
 });
 
 // Close modal when clicking on the background for Add Alumni Profile Modal

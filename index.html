@@ -267,7 +267,7 @@
             <div class="control has-icons-left has-icons-right">
               <input
                 class="input"
-                id="first_name"
+                id="alum_first_name"
                 type="text"
                 placeholder="first name"
               />
@@ -279,7 +279,7 @@
             <div class="control has-icons-left has-icons-right">
               <input
                 class="input"
-                id="last_name"
+                id="alum_last_name"
                 type="text"
                 placeholder="last name"
               />
@@ -291,7 +291,7 @@
             <div class="control has-icons-left has-icons-right">
               <input
                 class="input"
-                id="company_name"
+                id="alum_company"
                 type="text"
                 placeholder="company name"
               />
@@ -303,17 +303,30 @@
             <div class="control has-icons-left has-icons-right">
               <input
                 class="input"
-                id="position_name"
+                id="alum_position"
                 type="text"
                 placeholder="position"
               />
             </div>
           </div>
+          <!-- major (text) -->
+          <div class="field">
+            <label class="label">Major</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_major"
+                type="text"
+                placeholder="major"
+              />
+            </div>
+          </div>
+
           <!-- industry (select) -->
           <div class="field">
             <label class="label">Industry</label>
             <div class="select is-fullwidth">
-              <select id="industry_name">
+              <select id="alum_industry">
                 <option>Medicine</option>
                 <option>Finance</option>
                 <option>Technology</option>
@@ -324,7 +337,82 @@
               </select>
             </div>
           </div>
-
+          <!-- degree (select) -->
+          <div class="field">
+            <label class="label">Degree</label>
+            <div class="select is-fullwidth">
+              <select id="alum_degree">
+                <option>BBA</option>
+                <option>BA</option>
+                <option>BS</option>
+                <option>B.Eng</option>
+                <option>B.S.N</option>
+                <option>B.Des</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <!-- city (text) -->
+          <div class="field">
+            <label class="label">City</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_city"
+                type="text"
+                placeholder="city"
+              />
+            </div>
+          </div>
+          <!-- state (text) -->
+          <div class="field">
+            <label class="label">State</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_state"
+                type="text"
+                placeholder="state"
+              />
+            </div>
+          </div>
+          <!-- graduation year (number) -->
+          <div class="field">
+            <label class="label">Graduation Year</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_grad_yr"
+                type="number"
+                placeholder="year"
+              />
+            </div>
+          </div>
+          <!-- email (text) -->
+          <div class="field">
+            <label class="label">Email</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_email"
+                type="text"
+                placeholder="email"
+              />
+            </div>
+          </div>
+          <!-- linkedin (text) -->
+          <div class="field">
+            <label class="label">Linkedin</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_linkedin"
+                type="text"
+                placeholder="linkedin"
+              />
+            </div>
+          </div>
+          <!-- profile photos -->
           <div class="field m-4">
             <label class="label">Profile Photo:</label>
             <div class="control">
