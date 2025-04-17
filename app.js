@@ -126,7 +126,38 @@ r_e("sign_in_form").addEventListener("submit", (e) => {
   // sign user in
   auth
     .signInWithEmailAndPassword(email, pass)
-    .then((user) => {
+    .then((userCredential) => {
+      const userEmail = userCredential.user.email;
+      db.collection("Members")
+        .where("email", "==", userEmail)
+        .get()
+        .then((querySnapshot) => {
+          if (!querySnapshot.empty) {
+            querySnapshot.forEach((doc) => {
+              const data = doc.data();
+              const firstName = data.first_name;
+              const lastName = data.last_name;
+              //show the currently signed up/signed in user's info in nav-bar
+              const infoBox = document.getElementById("navbar-user-info");
+              infoBox.innerHTML = `
+              <div>
+                <span class="has-text-weight-semibold">${firstName} ${lastName}</span><br>
+              </div>
+            `;
+              //test
+              console.log(firstName, lastName);
+            });
+          } else {
+            console.warn(
+              "No matching member document found for email:",
+              userEmail
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching member data:", error);
+        });
+
       // notify user they are signed in
       alert(`You are now signed in!`);
 
