@@ -97,6 +97,12 @@
           >WIB Alumni Search</a
         >
       </div>
+      <div class="navbar-item"></div>
+      <!-- placeholder for user info -->
+      <div class="navbar-item" id="navbar-user-info">
+        <!-- Will be filled dynamically with JavaScript -->
+      </div>
+      <!-- navbar end! -->
       <div class="navbar-end">
         <a
           class="button mr-3 custom_db"
@@ -157,6 +163,21 @@
           Sign Up to be a Registered User!
         </p>
         <form id="sign_up_form">
+          <!-- first name -->
+          <div class="field">
+            <label class="label">First Name</label>
+            <div class="control">
+              <input id="member_first_name" placeholder="Jane" class="input" />
+            </div>
+          </div>
+
+          <!-- last name -->
+          <div class="field">
+            <label class="label">Last Name</label>
+            <div class="control">
+              <input id="member_last_name" placeholder="Doe" class="input" />
+            </div>
+          </div>
           <!-- email -->
           <div class="field">
             <label class="label">Email</label>

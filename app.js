@@ -49,8 +49,22 @@ const add_alum_profile = (
 
 r_e("sign_up_form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  let email = r_e("sign_up_email").value; // Make sure to retrieve the email value from the form
+  let first_name = r_e("member_first_name").value;
+  let last_name = r_e("member_last_name").value;
+  let email = r_e("sign_up_email").value;
   let password = r_e("sign_up_pass").value;
+
+  let member_obj = {
+    first_name: first_name,
+    last_name: last_name,
+    email: email,
+    password: password,
+    role: "",
+    active_status: true,
+    events_attended: null,
+    saved_alumni: [],
+    join_date: firebase.firestore.Timestamp.now(),
+  };
 
   try {
     // Check if the email is already in use
@@ -65,8 +79,17 @@ r_e("sign_up_form").addEventListener("submit", async (e) => {
   try {
     // Attempt to create the user with the actual password
     await auth.createUserWithEmailAndPassword(email, password);
+    //adding information to the db.collection - "Members
+    await db.collection("Members").add(member_obj);
     // User creation successful
     alert(`Account ${auth.currentUser.email} has been created`);
+    //show the currently signed up/signed in user's info
+    const infoBox = document.getElementById("navbar-user-info");
+    infoBox.innerHTML = `
+    <div>
+      <span class="has-text-weight-semibold">${first_name} ${last_name}</span><br>
+    </div>
+  `;
     // Reset the form
     r_e("sign_up_form").reset();
     // Close the modal
@@ -78,6 +101,9 @@ r_e("sign_up_form").addEventListener("submit", async (e) => {
     r_e("sign_up_form").reset();
     return; // Return to stop further execution
   }
+
+  // Reset the form (double check the form ID)
+  r_e("sign_up_form").reset();
 });
 
 // Close modal when clicking on the background for Sign Up
