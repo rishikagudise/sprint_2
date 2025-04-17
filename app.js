@@ -309,8 +309,6 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
     <img src="test.jpg" class="profile-img" alt="Profile Image" />
     <h3>${first_name} ${last_name}</h3>
     <p>${company}</p>
-    <p>${position}</p>
-    <p>${industry}</p>
 `;
 
   // Append the card to the carousel
