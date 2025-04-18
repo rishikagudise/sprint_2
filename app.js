@@ -974,14 +974,14 @@ function load_expanded(docId) {
       const data = doc.data();
       const name = `${data.first_name} ${data.last_name}`;
       const company = data.company || "Unknown Company";
-      const position = data.position || "Senior Data Analyst";
+      const position = data.current_position || "Senior Data Analyst";
       const about =
-        data.bio || "Passionate about data-driven decision-making...";
+        data.bio || "Passionate about data-driven decision-making..."; //need to add this in the doc???
       const education =
-        data.education ||
+        data.degree ||
         "Bachelor's in Business Analytics, University of XYZ (2013 - 2017)";
-      const email = data.email || "jane.doe@example.com";
-      const linkedin = data.linkedin || "https://www.linkedin.com";
+      const email = data.contact_info.email || "jane.doe@example.com";
+      const linkedin = data.contact_info.linkedin || "https://www.linkedin.com";
       const image = data.photo_url || "test.jpg";
 
       style_html = `
@@ -1078,7 +1078,6 @@ function load_expanded(docId) {
           </div>
         </div>
       </div>
-
       <section class="section">
         <div class="container">
           <h1 class="title">Notes</h1>
@@ -1091,6 +1090,10 @@ function load_expanded(docId) {
         </div>
       </section>
     `;
+      //^^^we need to make the notes section only available/show up for logged in members?
+      //^^^also do we need to add firestore functionality to the notes section so they are saved?
+      //^^^lastly, do we need to make the notes only appear if they are in the members dashboard? (I think yes!)
+      //^^^so with the notes, they need to appear for logged in members and only for alumni cards in the dashboard!
 
       document.getElementById("main_content").innerHTML = content;
       document.querySelector("style").innerHTML = style_html;
