@@ -327,6 +327,65 @@ r_e("add_modal").addEventListener("click", (e) => {
   }
 });
 
+// r_e("searchbar").addEventListener("submit", (e) => {
+//   e.preventDefault();
+//   console.log("clicked");
+
+// const gradYear = r_e("grad_filter").value;
+// const major = r_e("major_filter").value;
+// const location = r_e("location_filter").value.toLowerCase();
+// const industry = r_e("industry_filter").value;
+// const company = r_e("company_filter").value.toLowerCase();
+
+// const resultsContainer = r_e("alumni-results");
+// resultsContainer.innerHTML = ""; // Clear existing results
+
+// db.collection("Alumni")
+//   .get()
+//   .then((querySnapshot) => {
+//     querySnapshot.forEach((doc) => {
+//       const data = doc.data();
+//       let match = true;
+
+//       if (gradYear !== "All" && data.graduation_year != gradYear)
+//         match = false;
+//       if (major !== "All" && data.major !== major) match = false;
+//       if (industry !== "All" && data.industry !== industry) match = false;
+
+//       if (
+//         location &&
+//         !(data.city && data.city.toLowerCase().includes(location)) &&
+//         !(data.state && data.state.toLowerCase().includes(location))
+//       ) {
+//         match = false;
+//       }
+
+//       if (
+//         company &&
+//         !(data.company && data.company.toLowerCase().includes(company))
+//       ) {
+//         match = false;
+//       }
+
+//       if (match) {
+//         const fullName = `${data.first_name} ${data.last_name}`;
+//         const image = "test.jpg"; // replace if photo URL available
+
+//         const cardHTML = `
+//           <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
+//             doc.id
+//           }')">
+//             <img src="${image}" class="profile-img" />
+//             <h3>${fullName}</h3>
+//             <p>${data.company || "Unknown Company"}</p>
+//           </div>
+//         `;
+//         resultsContainer.innerHTML += cardHTML;
+//       }
+//     });
+//   });
+//});
+
 // Update Calendar
 let currentDate = new Date();
 let events = {};
@@ -734,12 +793,9 @@ function loadPage(page, docId = null) {
     </div>
       `;
 
-    // Log the button to see if it's being correctly loaded
-    let addProfileBtn = document.querySelector("#add_profile_btn");
-    console.log("add_profile_btn", addProfileBtn);
-
-    let addProfileModal = document.querySelector("#add_modal");
-    console.log("addProfileModal:", addProfileModal);
+    document.getElementById("main_content").innerHTML = content;
+    document.querySelector("style").innerHTML = style_html;
+    renderCalendar();
   } else if (page === "search_page") {
     db.collection("Alumni")
       .get()
@@ -858,89 +914,164 @@ function loadPage(page, docId = null) {
       ><b>Add a Profile</b></a
     >
     <br></br>
-        <form id="searchbar" class="mb-6 mx-6" action="#">
-      <div class="field is-grouped">
-        <div class="control is-expanded">
-          <input
-            id="searchInpt"
-            type="text"
-            class="input"
-            placeholder="Search"
-          />
-        </div>
-        <div class="control">
-          <button id="searchBtn" class="button custom_find_btn">
-            <b>Find!</b>
-          </button>
+        <form id="searchbar" class="mb-6 mx-6">
+  <!-- Search + Submit -->
+  <div class="field is-grouped">
+    <div class="control is-expanded">
+      <input
+        id="searchInpt"
+        type="text"
+        class="input"
+        placeholder="Search"
+      />
+    </div>
+    <div class="control">
+      <input
+        type="submit"
+        value="Search!"
+        id="searchBtn"
+        class="button custom_find_btn"
+      />
+    </div>
+  </div>
+
+  <!-- Filter Section -->
+  <div class="filter-section">
+    <div class="columns is-multiline">
+      <!-- Graduation Year -->
+      <div class="column is-one-quarter">
+        <label class="label">Graduation Year</label>
+        <div class="select is-fullwidth">
+          <select id="grad_filter">
+            <option>All</option>
+            <option>2024</option>
+            <option>2023</option>
+            <option>2022</option>
+            <option>2021</option>
+            <option>2020</option>
+          </select>
         </div>
       </div>
-    </form>
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-      <div class="columns is-multiline">
-        <!-- grad yr filter -->
-        <div class="column is-one-quarter">
-          <label class="label">Graduation Year</label>
-          <div class="select is-fullwidth">
-            <select>
-              <option>All</option>
-              <option>2024</option>
-              <option>2023</option>
-              <option>2022</option>
-              <option>2021</option>
-              <option>2020</option>
-            </select>
-          </div>
+      <!-- Major -->
+      <div class="column is-one-quarter">
+        <label class="label">Major/Field of Study</label>
+        <div class="select is-fullwidth">
+          <select id="major_filter">
+            <option>All</option>
+            <option>Accounting</option>
+            <option>Finance</option>
+            <option>Marketing</option>
+            <option>Computer Science</option>
+            <option>Data Science</option>
+          </select>
         </div>
-        <!-- majors filter -->
-        <div class="column is-one-quarter">
-          <label class="label">Major/Field of Study</label>
-          <div class="select is-fullwidth">
-            <select>
-              <option>All</option>
-              <option>Business Administration</option>
-              <option>Finance</option>
-              <option>Marketing</option>
-              <option>Computer Science</option>
-              <option>Data Science</option>
-            </select>
-          </div>
+      </div>
+
+      <!-- Location -->
+      <div class="column is-one-quarter">
+        <label class="label">Location</label>
+        <input
+          id="location_filter"
+          class="input"
+          type="text"
+          placeholder="Enter a City or State"
+        />
+      </div>
+
+      <!-- Industry -->
+      <div class="column is-one-quarter">
+        <label class="label">Industry</label>
+        <div class="select is-fullwidth">
+          <select id="industry_filter">
+            <option>All</option>
+            <option>Medicine</option>
+            <option>Finance</option>
+            <option>Technology</option>
+            <option>Health Care</option>
+            <option>Enviornment</option>
+            <option>Education</option>
+          </select>
         </div>
-        <!-- location filter -->
-        <div class="column is-one-quarter">
-          <label class="label">Location</label>
-          <input
-            class="input"
-            type="text"
-            placeholder="Enter a City or State"
-          />
-        </div>
-        <div class="column is-one-quarter">
-          <label class="label">Industry</label>
-          <div class="select is-fullwidth">
-            <select>
-              <option>All</option>
-              <option>Medicine</option>
-              <option>Finance</option>
-              <option>Technology</option>
-              <option>Health Care</option>
-              <option>Enviornment</option>
-              <option>Education</option>
-            </select>
-          </div>
-        </div>
-        <div class="column is-one-quarter">
-          <label class="label">Company Name</label>
-          <input type="text" class="input" placeholder="Enter a company name" />
-        </div>
+      </div>
+
+      <!-- Company -->
+      <div class="column is-one-quarter">
+        <label class="label">Company Name</label>
+        <input
+          id="company_filter"
+          type="text"
+          class="input"
+          placeholder="Enter a company name"
+        />
       </div>
     </div>
+  </div>
+</form>
+
     <!-- Results Section -->
     &nbsp;&nbsp;&nbsp;&nbsp;
     <header><b>Results: </b></header>
     <div id="alumni-results" class="columns is-multiline mt-3"></div>
       `;
+
+    document.getElementById("main_content").innerHTML = content;
+    document.querySelector("style").innerHTML = style_html;
+    r_e("searchbar").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const gradYear = r_e("grad_filter").value;
+      const major = r_e("major_filter").value;
+      const location = r_e("location_filter").value.toLowerCase();
+      const industry = r_e("industry_filter").value;
+      const company = r_e("company_filter").value.toLowerCase();
+      const resultsContainer = r_e("alumni-results");
+      resultsContainer.innerHTML = ""; // Clear existing results
+      console.log("clicked");
+      db.collection("Alumni")
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            let match = true;
+
+            if (gradYear !== "All" && data.graduation_year != gradYear)
+              match = false;
+            if (major !== "All" && data.major !== major) match = false;
+            if (industry !== "All" && data.industry !== industry) match = false;
+
+            if (
+              location &&
+              !(data.city && data.city.toLowerCase().includes(location)) &&
+              !(data.state && data.state.toLowerCase().includes(location))
+            ) {
+              match = false;
+            }
+
+            if (
+              company &&
+              !(data.company && data.company.toLowerCase().includes(company))
+            ) {
+              match = false;
+            }
+
+            if (match) {
+              const fullName = `${data.first_name} ${data.last_name}`;
+              const image = "test.jpg"; // replace if photo URL available
+
+              const cardHTML = `
+          <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
+            doc.id
+          }')">
+            <img src="${image}" class="profile-img" />
+            <h3>${fullName}</h3>
+            <p>${data.company || "Unknown Company"}</p>
+          </div>
+        `;
+              resultsContainer.innerHTML += cardHTML;
+            }
+          });
+        });
+    });
   } else if (page == "expanded") {
     //might need to change this method of dynamically gathering information because we prolly
     //make use of firebase db.
@@ -956,9 +1087,6 @@ function loadPage(page, docId = null) {
     //   });
     load_expanded(docId);
   }
-  document.getElementById("main_content").innerHTML = content;
-  document.querySelector("style").innerHTML = style_html;
-  renderCalendar();
 }
 
 function load_expanded(docId) {
