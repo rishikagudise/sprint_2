@@ -430,7 +430,7 @@ function deleteEvent(key, index) {
 
 renderCalendar();
 
-function loadPage(page) {
+function loadPage(page, docId = null) {
   let content = "";
   if (page === "dashboard") {
     style_html = `
@@ -741,6 +741,32 @@ function loadPage(page) {
     let addProfileModal = document.querySelector("#add_modal");
     console.log("addProfileModal:", addProfileModal);
   } else if (page === "search_page") {
+    db.collection("Alumni")
+      .get()
+      .then((querySnapshot) => {
+        const resultsContainer = document.getElementById("alumni-results");
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+
+          const fullName = `${data.first_name} ${data.last_name}`;
+          const company = data.company || "Unknown Company";
+          const image = "test.jpg"; // fallback image
+
+          const cardHTML = `
+  <div class="profile-card column is-one-quarter" data-id="${doc.id}" onclick="loadPage('expanded', '${doc.id}')">
+    <img src="${image}" class="profile-img" />
+    <h3>${fullName}</h3>
+    <p>${company}</p>
+  </div>
+`;
+
+          resultsContainer.innerHTML += cardHTML;
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading alumni:", error);
+      });
     style_html = `
       body {
         background: linear-gradient(to top, #f6e4da, #ffdde1, #f1b3bb, #ee9ca7);
@@ -758,38 +784,37 @@ function loadPage(page) {
         margin-bottom: 20px;
       }
 
-      .profile-container {
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        max-width: 900px;
-        margin: auto;
-        padding: 20px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-      }
-
-      .profile-photo {
-        flex: 1 1 250px;
+     .profile-card {
+        flex: 0 0 170px;
+        /* display: flex; */
+        /* flex-direction: column; */
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        width: 200px;
+        margin: 10px;
+        align-items: center;
         text-align: center;
+        padding: 1rem;
+        cursor: pointer;
       }
 
-      .profile-photo img {
-        width: 100%;
-        max-width: 250px;
-        height: auto;
-        border-radius: 15px;
-        object-fit: cover;
-      }
-
-      .profile-details {
-        flex: 2 1 500px;
-      }
-
-      .profile-details h2 {
-        color: #ee9ca7;
+      .profile-card h3 {
+        font-size: 1.2rem;
         font-weight: bold;
+        color: #333;
+      }
+
+      .profile-card p {
+        font-size: 1rem;
+        color: #666;
+      }
+
+      .profile-img {
+        width: 100%;
+        height: 160px;
+        object-fit: cover;
+        border-radius: 10px;
       }
 
       .info-section {
@@ -914,29 +939,53 @@ function loadPage(page) {
     <!-- Results Section -->
     &nbsp;&nbsp;&nbsp;&nbsp;
     <header><b>Results: </b></header>
+    <div id="alumni-results" class="columns is-multiline mt-3"></div>
       `;
   } else if (page == "expanded") {
     //might need to change this method of dynamically gathering information because we prolly
     //make use of firebase db.
-    document
-      .getElementById("carousel")
-      .addEventListener("click", function (event) {
-        let card = event.target.closest(".profile-card");
-        if (card) {
-          let full_name = card.querySelector("h3").textContent;
-          let company = card.querySelector("p").textContent;
-          load_expanded(full_name, company);
-        }
-      });
+    // document
+    //   .getElementById("carousel")
+    //   .addEventListener("click", function (event) {
+    //     let card = event.target.closest(".profile-card");
+    //     if (card) {
+    //       let full_name = card.querySelector("h3").textContent;
+    //       let company = card.querySelector("p").textContent;
+    //       load_expanded(full_name, company);
+    //     }
+    //   });
+    load_expanded(docId);
   }
   document.getElementById("main_content").innerHTML = content;
   document.querySelector("style").innerHTML = style_html;
   renderCalendar();
 }
 
-function load_expanded(name, company) {
-  style_html = `
-    body {
+function load_expanded(docId) {
+  db.collection("Alumni")
+    .doc(docId)
+    .get()
+    .then((doc) => {
+      if (!doc.exists) {
+        console.error("Alumni profile not found.");
+        return;
+      }
+
+      const data = doc.data();
+      const name = `${data.first_name} ${data.last_name}`;
+      const company = data.company || "Unknown Company";
+      const position = data.position || "Senior Data Analyst";
+      const about =
+        data.bio || "Passionate about data-driven decision-making...";
+      const education =
+        data.education ||
+        "Bachelor's in Business Analytics, University of XYZ (2013 - 2017)";
+      const email = data.email || "jane.doe@example.com";
+      const linkedin = data.linkedin || "https://www.linkedin.com";
+      const image = data.photo_url || "test.jpg";
+
+      style_html = `
+      body {
         background: linear-gradient(to top, #f6e4da, #ffdde1, #f1b3bb, #ee9ca7);
         min-height: 100vh;
         display: flex;
@@ -1002,76 +1051,50 @@ function load_expanded(name, company) {
       }
     `;
 
-  content = `
-      <!-- Alumni Profile -->
-    <div class="profile-container">
-      <!-- Profile Picture -->
-      <div class="profile-photo">
-        <img src="test.jpg" alt="Alumni Photo" />
-      </div>
-
-      <!-- Alumni Details -->
-      <div class="profile-details">
-        <h2>${name}</h2>
-        <p><strong>Company:</strong>${company}</p>
-        <p><strong>Position:</strong> Senior Data Analyst</p>
-
-        <div class="info-section">
-          <h3>About</h3>
-          <p>
-            Passionate about data-driven decision-making, Jane has over 5 years
-            of experience in analytics, driving business growth through insights
-            and innovation.
-          </p>
+      content = `
+      <div class="profile-container">
+        <div class="profile-photo">
+          <img src="${image}" alt="${name}" />
         </div>
+        <div class="profile-details">
+          <h2>${name}</h2>
+          <p><strong>Company:</strong> ${company}</p>
+          <p><strong>Position:</strong> ${position}</p>
 
-        <div class="info-section">
-          <h3>Work Experience</h3>
-          <ul>
-            <li>
-              <strong>Senior Data Analyst</strong> at Tech Innovations Inc.
-              (2020 - Present)
-            </li>
-            <li>
-              <strong>Data Analyst</strong> at Analytics Co. (2017 - 2020)
-            </li>
-          </ul>
-        </div>
+          <div class="info-section">
+            <h3>About</h3>
+            <p>${about}</p>
+          </div>
 
-        <div class="info-section">
-          <h3>Education</h3>
-          <p>
-            Bachelor's in Business Analytics, University of XYZ (2013 - 2017)
-          </p>
-        </div>
+          <div class="info-section">
+            <h3>Education</h3>
+            <p>${education}</p>
+          </div>
 
-        <div class="info-section contact-info">
-          <h3>Contact</h3>
-          <p>
-            Email:
-            <a href="mailto:jane.doe@example.com">jane.doe@example.com</a>
-          </p>
-          <p>
-            LinkedIn:
-            <a href="https://www.linkedin.com">linkedin.com/in/janedoe</a>
-          </p>
+          <div class="info-section contact-info">
+            <h3>Contact</h3>
+            <p>Email: <a href="mailto:${email}">${email}</a></p>
+            <p>LinkedIn: <a href="${linkedin}" target="_blank">${linkedin}</a></p>
+          </div>
         </div>
       </div>
-    </div>
-    <section class="section">
-      <div class="container">
-        <h1 class="title">Notes</h1>
-        <textarea
-          id="notes"
-          class="textarea"
-          placeholder="Write your notes here..."
-          rows="10"
-        ></textarea>
-      </div>
-    </section>
+
+      <section class="section">
+        <div class="container">
+          <h1 class="title">Notes</h1>
+          <textarea
+            id="notes"
+            class="textarea"
+            placeholder="Write your notes here..."
+            rows="10"
+          ></textarea>
+        </div>
+      </section>
     `;
-  document.getElementById("main_content").innerHTML = content;
-  document.querySelector("style").innerHTML = style_html;
+
+      document.getElementById("main_content").innerHTML = content;
+      document.querySelector("style").innerHTML = style_html;
+    }); // <- this closes .then()
 }
 
 function scrollLeft() {
