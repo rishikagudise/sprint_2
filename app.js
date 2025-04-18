@@ -1094,7 +1094,6 @@ function load_expanded(docId) {
       //^^^also do we need to add firestore functionality to the notes section so they are saved?
       //^^^lastly, do we need to make the notes only appear if they are in the members dashboard? (I think yes!)
       //^^^so with the notes, they need to appear for logged in members and only for alumni cards in the dashboard!
-
       document.getElementById("main_content").innerHTML = content;
       document.querySelector("style").innerHTML = style_html;
     }); // <- this closes .then()
