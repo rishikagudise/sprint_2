@@ -553,19 +553,19 @@ function loadPage(page) {
         border-radius: 5px;
       }
 
-      #add_profile_btn {
-        background-color: #ffdde1;
-        border-color: #ee9ca7;
-        color: rgb(252, 146, 146);
-        top: 10px;
-        left: 10px;
-        border-radius: 10px;
-        max-width: 150px;
-      }
-      #add_profile_btn:hover {
-        background-color: #fff9fa;
-        color: #333;
-      }
+      // #add_profile_btn {
+      //   background-color: #ffdde1;
+      //   border-color: #ee9ca7;
+      //   color: rgb(252, 146, 146);
+      //   top: 10px;
+      //   left: 10px;
+      //   border-radius: 10px;
+      //   max-width: 150px;
+      // }
+      // #add_profile_btn:hover {
+      //   background-color: #fff9fa;
+      //   color: #333;
+      // }
 
       .calendar-container {
         width: 80%;
@@ -615,9 +615,6 @@ function loadPage(page) {
       }
     `;
     content = `
-    <a class="button mr-3 custom_db" id="add_profile_btn"
-      ><b>Add a Profile</b></a
-    >
     <div class="title-container">
       <h1 class="title">My Dashboard</h1>
       <p class="subtitle">
@@ -805,6 +802,15 @@ function loadPage(page) {
         margin-bottom: 5px;
       }
 
+      #add_profile_btn:hover {
+        background-color: #fff9fa;
+        color: #333;
+      }
+      #add_profile_btn:hover {
+        background-color: #fff9fa;
+        color: #333;
+      }
+
       .contact-info a {
         color: #ee9ca7;
         text-decoration: underline;
@@ -823,6 +829,10 @@ function loadPage(page) {
       }
     `;
     content = `
+    <a class="button mr-3 custom_db" id="add_profile_btn"
+      ><b>Add a Profile</b></a
+    >
+    <br></br>
         <form id="searchbar" class="mb-6 mx-6" action="#">
       <div class="field is-grouped">
         <div class="control is-expanded">
