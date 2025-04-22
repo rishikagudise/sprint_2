@@ -2,7 +2,6 @@
 // document.addEventListener("DOMContentLoaded", function () {
 //   loadPage("home"); // Load the home page by default
 // });
-
 // a function to return elements by their IDs
 function r_e(id) {
   return document.querySelector(`#${id}`);
@@ -22,8 +21,16 @@ function configure_message_bar(msg) {
   }, 3000);
 }
 
-// User Sign Up
+//what happens when the auth changes (signed in vs no one signed in states)
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    r_e("navbar-user-info").innerHTML = user.email;
+  } else {
+    r_e("navbar-user-info").innerHTML = "Not signed in";
+  }
+});
 
+// User Sign Up
 r_e("sign_up_form").addEventListener("submit", async (e) => {
   e.preventDefault();
   let first_name = r_e("member_first_name").value;
@@ -60,13 +67,6 @@ r_e("sign_up_form").addEventListener("submit", async (e) => {
     await db.collection("Members").add(member_obj);
     // User creation successful
     alert(`Account ${auth.currentUser.email} has been created`);
-    //show the currently signed up/signed in user's info
-    const infoBox = document.getElementById("navbar-user-info");
-    infoBox.innerHTML = `
-    <div>
-      <span class="has-text-weight-semibold">${first_name} ${last_name}</span><br>
-    </div>
-  `;
     // Reset the form
     r_e("sign_up_form").reset();
     // Close the modal
