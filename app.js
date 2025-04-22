@@ -208,6 +208,9 @@ auth.onAuthStateChanged((user) => {
     r_e("signupbtn").classList.add("is-hidden");
     r_e("signinbtn").classList.add("is-hidden");
     r_e("signoutbtn").classList.remove("is-hidden");
+    // when signed in, dashboard and search pages and efunctionality no longer hidden
+    r_e("mydashboard").classList.remove("is-hidden");
+    r_e("search_page").classList.remove("is-hidden");
   }
 });
 
