@@ -666,36 +666,7 @@ function loadPage(page, docId = null) {
     </div>
 
     <div class="car-container" id="carousel">
-      <!-- profile 1 -->
-      <div class="profile-card" onclick="loadPage('expanded')">
-        <img src="test.jpg" class="profile-img" />
-        <h3>Jane Doe</h3>
-        <p>Google</p>
-      </div>
-      <!-- profile 2 -->
-      <div class="profile-card" onclick="loadPage('expanded')">
-        <img src="test.jpg" class="profile-img" />
-        <h3>Alice Walker</h3>
-        <p>Meta</p>
-      </div>
-      <!-- profile 3 -->
-      <div class="profile-card" onclick="loadPage('expanded')">
-        <img src="test.jpg" class="profile-img" />
-        <h3>Julia Jones</h3>
-        <p>Instagram</p>
-      </div>
-      <!-- profile 4 -->
-      <div class="profile-card" onclick="loadPage('expanded')">
-        <img src="test.jpg" class="profile-img" />
-        <h3>Lilly Porter</h3>
-        <p>Facebook</p>
-      </div>
-      <!-- profile 5 -->
-      <div class="profile-card" onclick="loadPage('expanded')">
-        <img src="test.jpg" class="profile-img" />
-        <h3>Angie Tufts</h3>
-        <p>Amazon</p>
-      </div>
+    
     </div>
 
     <!-- Calendar -->
@@ -773,6 +744,54 @@ function loadPage(page, docId = null) {
     document.getElementById("main_content").innerHTML = content;
     document.querySelector("style").innerHTML = style_html;
     renderCalendar();
+    //to actually load the signed in member's saved alumni profiles into their dashboard
+    setTimeout(async () => {
+      const carousel = document.getElementById("carousel");
+
+      if (!auth.currentUser) return;
+
+      // Get the logged-in member document
+      const memberSnapshot = await db
+        .collection("Members")
+        .where("email", "==", auth.currentUser.email)
+        .limit(1)
+        .get();
+
+      if (!memberSnapshot.empty) {
+        const memberDoc = memberSnapshot.docs[0];
+        const savedRefs = memberDoc.data().saved_alumni || [];
+
+        if (savedRefs.length === 0) {
+          carousel.innerHTML =
+            "<p>No saved alumni yet. Go add some from the Search page!</p>";
+          return;
+        }
+
+        // Loop through the saved references
+        for (let ref of savedRefs) {
+          const alumDoc = await ref.get(); // get actual alumni doc
+          const alumData = alumDoc.data();
+
+          const fullName = `${alumData.first_name} ${alumData.last_name}`;
+          const image = alumData.photo_url || "test.jpg";
+          const company = alumData.company || "Unknown Company";
+
+          const card = document.createElement("div");
+          card.classList.add("profile-card");
+          card.setAttribute("onclick", `loadPage('expanded', '${alumDoc.id}')`);
+
+          card.innerHTML = `
+            <img src="${image}" class="profile-img" />
+            <h3>${fullName}</h3>
+            <p>${company}</p>
+          `;
+
+          carousel.appendChild(card);
+        }
+      } else {
+        carousel.innerHTML = "<p>⚠️ Member profile not found.</p>";
+      }
+    }, 0);
   } else if (page === "search_page") {
     db.collection("Alumni")
       .get()
