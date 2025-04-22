@@ -22,29 +22,6 @@ function configure_message_bar(msg) {
   }, 3000);
 }
 
-//this requires the firebase database!
-const add_alum_profile = (
-  f_name,
-  l_name,
-  company,
-  position,
-  industry,
-  profilePhoto
-) => {
-  let alum_profile = {
-    First_Name: f_name,
-    Last_Name: l_name,
-    Company: company,
-    Position: position,
-    Industry: industry,
-    Image: profilePhoto,
-  };
-
-  if (auth.currentUser != null) {
-    //need to add stuff here once we set up firebase collections
-  }
-};
-
 // User Sign Up
 
 r_e("sign_up_form").addEventListener("submit", async (e) => {
@@ -814,6 +791,7 @@ function loadPage(page, docId = null) {
     <img src="${image}" class="profile-img" />
     <h3>${fullName}</h3>
     <p>${company}</p>
+    
   </div>
 `;
 
@@ -823,6 +801,7 @@ function loadPage(page, docId = null) {
       .catch((error) => {
         console.error("Error loading alumni:", error);
       });
+
     style_html = `
       body {
         background: linear-gradient(to top, #f6e4da, #ffdde1, #f1b3bb, #ee9ca7);
@@ -1204,6 +1183,11 @@ function load_expanded(docId) {
             <p>Email: <a href="mailto:${email}">${email}</a></p>
             <p>LinkedIn: <a href="${linkedin}" target="_blank">${linkedin}</a></p>
           </div>
+          <div class="info-section mt-4">
+        <button class="button is-info" id="saveAlumBtn" data-id="${docId}">
+          ➕ Add to Dashboard
+        </button>
+      </div>
         </div>
       </div>
       <section class="section">
@@ -1224,6 +1208,48 @@ function load_expanded(docId) {
       //^^^so with the notes, they need to appear for logged in members and only for alumni cards in the dashboard!
       document.getElementById("main_content").innerHTML = content;
       document.querySelector("style").innerHTML = style_html;
+      setTimeout(async () => {
+        const saveBtn = document.getElementById("saveAlumBtn");
+        const alumniId = docId;
+
+        if (!auth.currentUser) return;
+
+        const memberSnapshot = await db
+          .collection("Members")
+          .where("email", "==", auth.currentUser.email)
+          .limit(1)
+          .get();
+
+        if (!memberSnapshot.empty) {
+          const memberDoc = memberSnapshot.docs[0];
+          const memberRef = memberDoc.ref;
+          const savedAlumni = memberDoc.data().saved_alumni || [];
+
+          // Check if this alumniRef already exists in saved_alumni
+          const alreadySaved = savedAlumni.some((ref) => ref.id === alumniId);
+
+          if (alreadySaved) {
+            saveBtn.disabled = true;
+            saveBtn.innerText = "✔️ Already Added";
+          }
+
+          // Button click to add if not already saved
+          saveBtn.addEventListener("click", async () => {
+            if (alreadySaved) return;
+
+            const alumniRef = db.collection("Alumni").doc(alumniId);
+            await memberRef.update({
+              saved_alumni: firebase.firestore.FieldValue.arrayUnion(alumniRef),
+            });
+
+            alert("Alumni saved to your dashboard!");
+            saveBtn.disabled = true;
+            saveBtn.innerText = "✔️ Already Added";
+          });
+        } else {
+          alert("Member not found.");
+        }
+      }, 0);
     }); // <- this closes .then()
 }
 
