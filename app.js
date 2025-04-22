@@ -1203,10 +1203,13 @@ function load_expanded(docId) {
             <p>LinkedIn: <a href="${linkedin}" target="_blank">${linkedin}</a></p>
           </div>
           <div class="info-section mt-4">
-        <button class="button is-info" id="saveAlumBtn" data-id="${docId}">
-          ➕ Add to Dashboard
-        </button>
-      </div>
+  <button class="button is-info" id="saveAlumBtn" data-id="${docId}">
+    ➕ Add to Dashboard
+  </button>
+  <button class="button is-danger is-light ml-2" id="removeAlumBtn" data-id="${docId}" style="display: none;">
+    ❌ Remove from Dashboard
+  </button>
+</div>
         </div>
       </div>
       <section class="section">
@@ -1229,6 +1232,7 @@ function load_expanded(docId) {
       document.querySelector("style").innerHTML = style_html;
       setTimeout(async () => {
         const saveBtn = document.getElementById("saveAlumBtn");
+        const removeBtn = document.getElementById("removeAlumBtn");
         const alumniId = docId;
 
         if (!auth.currentUser) return;
@@ -1244,31 +1248,90 @@ function load_expanded(docId) {
           const memberRef = memberDoc.ref;
           const savedAlumni = memberDoc.data().saved_alumni || [];
 
-          // Check if this alumniRef already exists in saved_alumni
+          const alumniRef = db.collection("Alumni").doc(alumniId);
+
+          // Check if this alumniRef is already saved
           const alreadySaved = savedAlumni.some((ref) => ref.id === alumniId);
 
           if (alreadySaved) {
             saveBtn.disabled = true;
-            saveBtn.innerText = "✔️ Already Added";
+            saveBtn.innerText = "✔️ Already Saved";
+            removeBtn.style.display = "inline-block";
           }
 
-          // Button click to add if not already saved
+          // Save button
           saveBtn.addEventListener("click", async () => {
             if (alreadySaved) return;
 
-            const alumniRef = db.collection("Alumni").doc(alumniId);
             await memberRef.update({
               saved_alumni: firebase.firestore.FieldValue.arrayUnion(alumniRef),
             });
 
-            alert("Alumni saved to your dashboard!");
+            alert("✅ Alumni saved to your dashboard!");
             saveBtn.disabled = true;
-            saveBtn.innerText = "✔️ Already Added";
+            saveBtn.innerText = "✔️ Added";
+            removeBtn.style.display = "inline-block";
+          });
+
+          // ✅ Remove button
+          removeBtn.addEventListener("click", async () => {
+            await memberRef.update({
+              saved_alumni:
+                firebase.firestore.FieldValue.arrayRemove(alumniRef),
+            });
+
+            alert("❌ Removed from dashboard!");
+
+            // Reload the expanded page to reflect the change
+            load_expanded(alumniId);
           });
         } else {
-          alert("Member not found.");
+          alert("⚠️ Member profile not found.");
         }
       }, 0);
+
+      // setTimeout(async () => {
+      //   const saveBtn = document.getElementById("saveAlumBtn");
+      //   const alumniId = docId;
+
+      //   if (!auth.currentUser) return;
+
+      //   const memberSnapshot = await db
+      //     .collection("Members")
+      //     .where("email", "==", auth.currentUser.email)
+      //     .limit(1)
+      //     .get();
+
+      //   if (!memberSnapshot.empty) {
+      //     const memberDoc = memberSnapshot.docs[0];
+      //     const memberRef = memberDoc.ref;
+      //     const savedAlumni = memberDoc.data().saved_alumni || [];
+
+      //     // Check if this alumniRef already exists in saved_alumni
+      //     const alreadySaved = savedAlumni.some((ref) => ref.id === alumniId);
+
+      //     if (alreadySaved) {
+      //       saveBtn.disabled = true;
+      //       saveBtn.innerText = "✔️ Already Added";
+      //     }
+
+      //     // Button click to add if not already saved
+      //     saveBtn.addEventListener("click", async () => {
+      //       if (alreadySaved) return;
+
+      //       const alumniRef = db.collection("Alumni").doc(alumniId);
+      //       await memberRef.update({
+      //         saved_alumni: firebase.firestore.FieldValue.arrayUnion(alumniRef),
+      //       });
+
+      //       alert("Alumni saved to your dashboard!");
+      //       saveBtn.disabled = true;
+      //       saveBtn.innerText = "✔️ Already Added";
+      //     });
+      //   } else {
+      //     alert("Member not found.");
+      //   }
+      // }, 0);
     }); // <- this closes .then()
 }
 
