@@ -99,16 +99,16 @@
       }
 
       .profile-photo {
-        flex: 1 1 250px;
-        text-align: center;
+        display: flex;
+        justify-content: center;
       }
 
       .profile-photo img {
-        width: 100%;
-        max-width: 250px;
-        height: auto;
-        border-radius: 15px;
+        width: 80px; /* or try 100px */
+        height: 80px;
+        border-radius: 50%; /* make it a circle if desired */
         object-fit: cover;
+        margin-bottom: 10px; /* spacing between image and name */
       }
 
       .profile-details {

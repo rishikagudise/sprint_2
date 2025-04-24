@@ -286,7 +286,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   alumCard.setAttribute("onclick", "loadPage('expanded')");
 
   alumCard.innerHTML = `
-    <img src="test.jpg" class="profile-img" alt="Profile Image" />
+    <img src="test.png" class="profile-img" alt="Profile Image" />
     <h3>${first_name} ${last_name}</h3>
     <p>${company}</p>
 `;
@@ -349,7 +349,7 @@ r_e("add_modal").addEventListener("click", (e) => {
 
 //       if (match) {
 //         const fullName = `${data.first_name} ${data.last_name}`;
-//         const image = "test.jpg"; // replace if photo URL available
+//         const image = "test.png"; // replace if photo URL available
 
 //         const cardHTML = `
 //           <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
@@ -776,7 +776,7 @@ function loadPage(page, docId = null) {
           const alumData = alumDoc.data();
 
           const fullName = `${alumData.first_name} ${alumData.last_name}`;
-          const image = alumData.photo_url || "test.jpg";
+          const image = alumData.photo_url || "test.png";
           const company = alumData.company || "Unknown Company";
 
           const card = document.createElement("div");
@@ -806,7 +806,7 @@ function loadPage(page, docId = null) {
 
           const fullName = `${data.first_name} ${data.last_name}`;
           const company = data.company || "Unknown Company";
-          const image = "test.jpg"; // fallback image
+          const image = "test.png"; // fallback image
 
           const cardHTML = `
   <div class="profile-card column is-one-quarter" data-id="${doc.id}" onclick="loadPage('expanded', '${doc.id}')">
@@ -1057,7 +1057,7 @@ function loadPage(page, docId = null) {
 
             if (match) {
               const fullName = `${data.first_name} ${data.last_name}`;
-              const image = "test.jpg"; // replace if photo URL available
+              const image = "test.png"; // replace if photo URL available
 
               const cardHTML = `
           <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
@@ -1111,7 +1111,7 @@ function load_expanded(docId) {
         "Bachelor's in Business Analytics, University of XYZ (2013 - 2017)";
       const email = data.contact_info.email || "jane.doe@example.com";
       const linkedin = data.contact_info.linkedin || "https://www.linkedin.com";
-      const image = data.photo_url || "test.jpg";
+      const image = data.photo_url || "test.png";
 
       style_html = `
       body {
