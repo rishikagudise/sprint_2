@@ -245,6 +245,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   let company = r_e("alum_company").value;
   let position = r_e("alum_position").value;
   let major = r_e("alum_major").value;
+  let university = r_e("alum_university").value;
   let industry = r_e("alum_industry").value;
   let degree = r_e("alum_degree").value;
   let city = r_e("alum_city").value;
@@ -259,8 +260,8 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
     company: company,
     current_position: position,
     major: major,
-    industry,
-    industry,
+    university: university,
+    industry: industry,
     degree: degree,
     city: city,
     state: state,
@@ -1135,16 +1136,13 @@ function load_expanded(docId) {
 
       const data = doc.data();
       const name = `${data.first_name} ${data.last_name}`;
-      const company = data.company || "Unknown Company";
-      const position = data.current_position || "Senior Data Analyst";
-      const about =
-        data.bio || "Passionate about data-driven decision-making..."; //need to add this in the doc???
-      const education =
-        data.degree ||
-        "Bachelor's in Business Analytics, University of XYZ (2013 - 2017)";
-      const email = data.contact_info.email || "jane.doe@example.com";
-      const linkedin = data.contact_info.linkedin || "https://www.linkedin.com";
-      const image = data.photo_url || "test.png";
+      const company = data.company || "NA";
+      const position = data.current_position || "NA";
+      const about = data.bio || "NA"; //need to add this in the doc???
+      const education = `${data.degree} at ${data.university}` || "NA";
+      const email = data.contact_info.email || "NA";
+      const linkedin = data.contact_info.linkedin || "NA";
+      const image = "test.png";
 
       style_html = `
       body {
