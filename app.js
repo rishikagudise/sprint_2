@@ -275,6 +275,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   //actually inserting into the db collection - alumni!!!
   try {
     await db.collection("Alumni").add(alum_obj);
+    alert("alum added successfully");
   } catch (error) {
     alert(`${error}`);
     return;
