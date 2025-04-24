@@ -923,7 +923,7 @@ function loadPage(page, docId = null) {
         id="searchInpt"
         type="text"
         class="input"
-        placeholder="Search"
+        placeholder="Search by First and/or Last Name"
       />
     </div>
     <div class="control">
@@ -1031,6 +1031,7 @@ function loadPage(page, docId = null) {
     document.querySelector("style").innerHTML = style_html;
     r_e("searchbar").addEventListener("submit", (e) => {
       e.preventDefault();
+      const searchBar = r_e("searchInpt").value;
       const gradYear = r_e("grad_filter").value;
       const major = r_e("major_filter").value;
       const state = r_e("state_filter").value.toLowerCase();
@@ -1051,6 +1052,20 @@ function loadPage(page, docId = null) {
               match = false;
             if (major !== "All" && data.major !== major) match = false;
             if (industry !== "All" && data.industry !== industry) match = false;
+
+            if (
+              searchBar &&
+              !(
+                data.first_name &&
+                data.first_name.toLowerCase().includes(searchBar.toLowerCase())
+              ) &&
+              !(
+                data.last_name &&
+                data.last_name.toLowerCase().includes(searchBar.toLowerCase())
+              )
+            ) {
+              match = false;
+            }
 
             if (
               state &&
