@@ -971,6 +971,17 @@ function loadPage(page, docId = null) {
         </div>
       </div>
 
+      <!-- University -->
+      <div class="column is-one-quarter">
+        <label class="label">University</label>
+        <input
+          id="university_filter"
+          class="input"
+          type="text"
+          placeholder="Enter a University"
+        />
+      </div>
+
       <!-- State -->
       <div class="column is-one-quarter">
         <label class="label">State</label>
@@ -1036,6 +1047,7 @@ function loadPage(page, docId = null) {
       const searchBar = r_e("searchInpt").value;
       const gradYear = r_e("grad_filter").value;
       const major = r_e("major_filter").value;
+      const university = r_e("university_filter").value;
       const state = r_e("state_filter").value.toLowerCase();
       const city = r_e("city_filter").value.toLowerCase();
       const industry = r_e("industry_filter").value;
@@ -1072,6 +1084,16 @@ function loadPage(page, docId = null) {
             if (
               state &&
               !(data.state && data.state.toLowerCase().includes(state))
+            ) {
+              match = false;
+            }
+
+            if (
+              state &&
+              !(
+                data.university &&
+                data.university.toLowerCase().includes(university)
+              )
             ) {
               match = false;
             }
@@ -1140,7 +1162,12 @@ function load_expanded(docId) {
       const company = data.company || "NA";
       const position = data.current_position || "NA";
       const about = data.bio || "NA"; //need to add this in the doc???
+      const city = data.city || "NA";
+      const state = data.state || "NA";
       const education = `${data.degree} at ${data.university}` || "NA";
+      const major = data.major || "NA";
+      const grad_yr = data.graduation_year || "NA";
+      const industry = data.industry || "NA";
       const email = data.contact_info.email || "NA";
       const linkedin = data.contact_info.linkedin || "NA";
       const image = "test.png";
@@ -1217,10 +1244,16 @@ function load_expanded(docId) {
         <div class="profile-photo">
           <img src="${image}" alt="${name}" />
         </div>
+        
         <div class="profile-details">
           <h2>${name}</h2>
           <p><strong>Company:</strong> ${company}</p>
           <p><strong>Position:</strong> ${position}</p>
+
+          <div class="info-section">
+            <h3>Industry</h3>
+            <p>${industry}</p>
+          </div>
 
           <div class="info-section">
             <h3>About</h3>
@@ -1228,8 +1261,23 @@ function load_expanded(docId) {
           </div>
 
           <div class="info-section">
+            <h3>Location</h3>
+            <p>${city},${state}</p>
+          </div>
+
+          <div class="info-section">
             <h3>Education</h3>
             <p>${education}</p>
+          </div>
+
+          <div class="info-section">
+            <h3>Major</h3>
+            <p>${major}</p>
+          </div>
+          
+          <div class="info-section">
+            <h3>Graduation Year</h3>
+            <p>${grad_yr}</p>
           </div>
 
           <div class="info-section contact-info">
