@@ -969,14 +969,25 @@ function loadPage(page, docId = null) {
         </div>
       </div>
 
-      <!-- Location -->
+      <!-- State -->
       <div class="column is-one-quarter">
-        <label class="label">Location</label>
+        <label class="label">State</label>
         <input
-          id="location_filter"
+          id="state_filter"
           class="input"
           type="text"
-          placeholder="Enter a City or State"
+          placeholder="Enter a State"
+        />
+      </div>
+
+      <!-- City -->
+      <div class="column is-one-quarter">
+        <label class="label">City</label>
+        <input
+          id="city_filter"
+          class="input"
+          type="text"
+          placeholder="Enter a City"
         />
       </div>
 
@@ -1022,7 +1033,8 @@ function loadPage(page, docId = null) {
       e.preventDefault();
       const gradYear = r_e("grad_filter").value;
       const major = r_e("major_filter").value;
-      const location = r_e("location_filter").value.toLowerCase();
+      const state = r_e("state_filter").value.toLowerCase();
+      const city = r_e("city_filter").value.toLowerCase();
       const industry = r_e("industry_filter").value;
       const company = r_e("company_filter").value.toLowerCase();
       const resultsContainer = r_e("alumni-results");
@@ -1041,9 +1053,15 @@ function loadPage(page, docId = null) {
             if (industry !== "All" && data.industry !== industry) match = false;
 
             if (
-              location &&
-              !(data.city && data.city.toLowerCase().includes(location)) &&
-              !(data.state && data.state.toLowerCase().includes(location))
+              state &&
+              !(data.state && data.state.toLowerCase().includes(state))
+            ) {
+              match = false;
+            }
+
+            if (
+              city &&
+              !(data.city && data.city.toLowerCase().includes(city))
             ) {
               match = false;
             }
@@ -1057,7 +1075,7 @@ function loadPage(page, docId = null) {
 
             if (match) {
               const fullName = `${data.first_name} ${data.last_name}`;
-              const image = "test.png"; // replace if photo URL available
+              const image = "test.png";
 
               const cardHTML = `
           <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
