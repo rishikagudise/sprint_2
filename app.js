@@ -242,6 +242,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   e.preventDefault();
   let first_name = r_e("alum_first_name").value;
   let last_name = r_e("alum_last_name").value;
+  let bio = r_e("alum_bio");
   let company = r_e("alum_company").value;
   let position = r_e("alum_position").value;
   let major = r_e("alum_major").value;
@@ -257,6 +258,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   let alum_obj = {
     first_name: first_name,
     last_name: last_name,
+    bio: bio,
     company: company,
     current_position: position,
     major: major,
