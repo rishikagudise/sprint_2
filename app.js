@@ -1299,6 +1299,8 @@ function load_expanded(docId) {
             placeholder="Write your notes here..."
             rows="10"
           ></textarea>
+          <br />
+    <button class="button is-success mt-2" id="saveNotesBtn">Save Notes</button>
         </div>
       </section>
     `;
@@ -1351,7 +1353,7 @@ function load_expanded(docId) {
             removeBtn.style.display = "inline-block";
           });
 
-          // ✅ Remove button
+          // Remove button
           removeBtn.addEventListener("click", async () => {
             await memberRef.update({
               saved_alumni:
@@ -1365,6 +1367,70 @@ function load_expanded(docId) {
           });
         } else {
           alert("⚠️ Member profile not found.");
+        }
+        const notesArea = r_e("notes");
+        const saveNotesBtn = r_e("saveNotesBtn");
+
+        if (!auth.currentUser) {
+          notesArea.disabled = true;
+          saveNotesBtn.style.display = "none";
+          return;
+        }
+
+        if (!memberSnapshot.empty) {
+          const memberDoc = memberSnapshot.docs[0];
+          const memberRef = memberDoc.ref;
+          const savedAlumni = memberDoc.data().saved_alumni || [];
+
+          const alumniRef = db.collection("Alumni").doc(docId);
+
+          const alreadySaved = savedAlumni.some((ref) => ref.id === docId);
+
+          if (!alreadySaved) {
+            notesArea.disabled = true;
+            saveNotesBtn.style.display = "none";
+            return;
+          }
+
+          //Keep track of whether a note document already exists
+          let existingNoteDocId = null;
+
+          const notesSnapshot = await memberRef
+            .collection("notes")
+            .where("alumni_id", "==", docId)
+            .limit(1)
+            .get();
+
+          if (!notesSnapshot.empty) {
+            const noteDoc = notesSnapshot.docs[0];
+            notesArea.value = noteDoc.data().content;
+            existingNoteDocId = noteDoc.id; // 💡 save the document ID for future updating
+          }
+
+          //Save notes
+          saveNotesBtn.addEventListener("click", async () => {
+            const newNoteContent = notesArea.value;
+
+            if (existingNoteDocId) {
+              //Update existing document
+              await memberRef
+                .collection("notes")
+                .doc(existingNoteDocId)
+                .update({
+                  content: newNoteContent,
+                });
+            } else {
+              //Add new document if none exists yet
+              const newDocRef = await memberRef.collection("notes").add({
+                alumni_id: docId,
+                content: newNoteContent,
+              });
+
+              existingNoteDocId = newDocRef.id; // update for future saves
+            }
+
+            alert("Notes saved successfully!");
+          });
         }
       }, 0);
 
