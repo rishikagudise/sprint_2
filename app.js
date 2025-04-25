@@ -114,13 +114,6 @@ r_e("sign_in_form").addEventListener("submit", (e) => {
               const data = doc.data();
               const firstName = data.first_name;
               const lastName = data.last_name;
-              //show the currently signed up/signed in user's info in nav-bar
-              const infoBox = document.getElementById("navbar-user-info");
-              infoBox.innerHTML = `
-              <div>
-                <span class="has-text-weight-semibold">${firstName} ${lastName}</span><br>
-              </div>
-            `;
               //test
               console.log(firstName, lastName);
             });
