@@ -1047,7 +1047,7 @@ function loadPage(page, docId = null) {
       const searchBar = r_e("searchInpt").value;
       const gradYear = r_e("grad_filter").value;
       const major = r_e("major_filter").value;
-      const university = r_e("university_filter").value;
+      const university = r_e("university_filter").value.toLowerCase();
       const state = r_e("state_filter").value.toLowerCase();
       const city = r_e("city_filter").value.toLowerCase();
       const industry = r_e("industry_filter").value;
@@ -1089,7 +1089,7 @@ function loadPage(page, docId = null) {
             }
 
             if (
-              state &&
+              university &&
               !(
                 data.university &&
                 data.university.toLowerCase().includes(university)
