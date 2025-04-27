@@ -304,65 +304,6 @@ r_e("add_modal").addEventListener("click", (e) => {
   }
 });
 
-// r_e("searchbar").addEventListener("submit", (e) => {
-//   e.preventDefault();
-//   console.log("clicked");
-
-// const gradYear = r_e("grad_filter").value;
-// const major = r_e("major_filter").value;
-// const location = r_e("location_filter").value.toLowerCase();
-// const industry = r_e("industry_filter").value;
-// const company = r_e("company_filter").value.toLowerCase();
-
-// const resultsContainer = r_e("alumni-results");
-// resultsContainer.innerHTML = ""; // Clear existing results
-
-// db.collection("Alumni")
-//   .get()
-//   .then((querySnapshot) => {
-//     querySnapshot.forEach((doc) => {
-//       const data = doc.data();
-//       let match = true;
-
-//       if (gradYear !== "All" && data.graduation_year != gradYear)
-//         match = false;
-//       if (major !== "All" && data.major !== major) match = false;
-//       if (industry !== "All" && data.industry !== industry) match = false;
-
-//       if (
-//         location &&
-//         !(data.city && data.city.toLowerCase().includes(location)) &&
-//         !(data.state && data.state.toLowerCase().includes(location))
-//       ) {
-//         match = false;
-//       }
-
-//       if (
-//         company &&
-//         !(data.company && data.company.toLowerCase().includes(company))
-//       ) {
-//         match = false;
-//       }
-
-//       if (match) {
-//         const fullName = `${data.first_name} ${data.last_name}`;
-//         const image = "test.png"; // replace if photo URL available
-
-//         const cardHTML = `
-//           <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
-//             doc.id
-//           }')">
-//             <img src="${image}" class="profile-img" />
-//             <h3>${fullName}</h3>
-//             <p>${data.company || "Unknown Company"}</p>
-//           </div>
-//         `;
-//         resultsContainer.innerHTML += cardHTML;
-//       }
-//     });
-//   });
-//});
-
 // Update Calendar
 let currentDate = new Date();
 let events = {};
@@ -1131,18 +1072,6 @@ function loadPage(page, docId = null) {
         });
     });
   } else if (page == "expanded") {
-    //might need to change this method of dynamically gathering information because we prolly
-    //make use of firebase db.
-    // document
-    //   .getElementById("carousel")
-    //   .addEventListener("click", function (event) {
-    //     let card = event.target.closest(".profile-card");
-    //     if (card) {
-    //       let full_name = card.querySelector("h3").textContent;
-    //       let company = card.querySelector("p").textContent;
-    //       load_expanded(full_name, company);
-    //     }
-    //   });
     load_expanded(docId);
   }
 }
@@ -1365,13 +1294,26 @@ function load_expanded(docId) {
                 firebase.firestore.FieldValue.arrayRemove(alumniRef),
             });
 
-            alert("❌ Removed from dashboard!");
+            // ALSO remove the related notes - if there are any!
+            const notesSnapshot = await memberRef
+              .collection("notes")
+              .where("alumni_id", "==", alumniId)
+              .get();
+
+            const batch = db.batch();
+            notesSnapshot.forEach((noteDoc) => {
+              batch.delete(noteDoc.ref);
+            });
+
+            await batch.commit();
+
+            alert("Alumni removed and associated notes deleted!");
 
             // Reload the expanded page to reflect the change
             load_expanded(alumniId);
           });
         } else {
-          alert("⚠️ Member profile not found.");
+          alert("Member profile not found.");
         }
         const notesArea = r_e("notes");
         const saveNotesBtn = r_e("saveNotesBtn");
@@ -1438,49 +1380,6 @@ function load_expanded(docId) {
           });
         }
       }, 0);
-
-      // setTimeout(async () => {
-      //   const saveBtn = document.getElementById("saveAlumBtn");
-      //   const alumniId = docId;
-
-      //   if (!auth.currentUser) return;
-
-      //   const memberSnapshot = await db
-      //     .collection("Members")
-      //     .where("email", "==", auth.currentUser.email)
-      //     .limit(1)
-      //     .get();
-
-      //   if (!memberSnapshot.empty) {
-      //     const memberDoc = memberSnapshot.docs[0];
-      //     const memberRef = memberDoc.ref;
-      //     const savedAlumni = memberDoc.data().saved_alumni || [];
-
-      //     // Check if this alumniRef already exists in saved_alumni
-      //     const alreadySaved = savedAlumni.some((ref) => ref.id === alumniId);
-
-      //     if (alreadySaved) {
-      //       saveBtn.disabled = true;
-      //       saveBtn.innerText = "✔️ Already Added";
-      //     }
-
-      //     // Button click to add if not already saved
-      //     saveBtn.addEventListener("click", async () => {
-      //       if (alreadySaved) return;
-
-      //       const alumniRef = db.collection("Alumni").doc(alumniId);
-      //       await memberRef.update({
-      //         saved_alumni: firebase.firestore.FieldValue.arrayUnion(alumniRef),
-      //       });
-
-      //       alert("Alumni saved to your dashboard!");
-      //       saveBtn.disabled = true;
-      //       saveBtn.innerText = "✔️ Already Added";
-      //     });
-      //   } else {
-      //     alert("Member not found.");
-      //   }
-      // }, 0);
     }); // <- this closes .then()
 }
 
