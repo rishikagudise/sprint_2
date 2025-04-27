@@ -458,7 +458,7 @@ function saveEvent() {
   closeModal();
   renderCalendar();
 }
-
+//test commit
 function deleteEvent(key, index) {
   events[key].splice(index, 1);
   renderCalendar();
