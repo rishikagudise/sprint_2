@@ -947,6 +947,11 @@ function loadPage(page, docId = null) {
             <option>2022</option>
             <option>2021</option>
             <option>2020</option>
+            <option>2019</option>
+            <option>2018</option>
+            <option>2017</option>
+            <option>2016</option>
+            <option>2015</option>
           </select>
         </div>
       </div>
