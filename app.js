@@ -2,6 +2,7 @@
 // document.addEventListener("DOMContentLoaded", function () {
 //   loadPage("home"); // Load the home page by default
 // });
+
 // a function to return elements by their IDs
 function r_e(id) {
   return document.querySelector(`#${id}`);
@@ -31,65 +32,68 @@ auth.onAuthStateChanged((user) => {
 });
 
 // User Sign Up
-r_e("sign_up_form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  let first_name = r_e("member_first_name").value;
-  let last_name = r_e("member_last_name").value;
-  let email = r_e("sign_up_email").value;
-  let password = r_e("sign_up_pass").value;
+document
+  .getElementById("sign_up_form")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  let member_obj = {
-    first_name: first_name,
-    last_name: last_name,
-    email: email,
-    password: password,
-    role: "",
-    active_status: true,
-    events_attended: null,
-    saved_alumni: [],
-    join_date: firebase.firestore.Timestamp.now(),
-  };
+    // Collect user input
+    const firstName = document.getElementById("member_first_name").value.trim();
+    const lastName = document.getElementById("member_last_name").value.trim();
+    const email = document.getElementById("sign_up_email").value.trim();
+    const password = document.getElementById("sign_up_pass").value.trim();
 
-  try {
-    // Check if the email is already in use
-    await auth.fetchSignInMethodsForEmail(email);
-    // If no error occurs, it means the email is not in use
-  } catch (error) {
-    // Handle the case where the email is already in use
-    alert("Email is already in use. Please try again.");
-    return; // Return to stop further execution
-  }
+    // Validate input (optional, but recommended)
+    if (!firstName || !lastName || !email || !password) {
+      alert("All fields are required. Please complete the form.");
+      return;
+    }
 
-  try {
-    // Attempt to create the user with the actual password
-    await auth.createUserWithEmailAndPassword(email, password);
-    //adding information to the db.collection - "Members
-    await db.collection("Members").add(member_obj);
-    // User creation successful
-    alert(`Account ${auth.currentUser.email} has been created`);
-    // Reset the form
-    r_e("sign_up_form").reset();
-    // Close the modal
-    r_e("smodal").classList.remove("is-active");
-  } catch (error) {
-    // Handle other errors during user creation
-    alert(`${error}`);
-    r_e("smodal").classList.remove("is-active");
-    r_e("sign_up_form").reset();
-    return; // Return to stop further execution
-  }
+    // User object for Firestore
+    const memberObj = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password, // Store hashed passwords in production
+      role: "", // Default role
+      active_status: false, // Require admin approval
+      events_attended: null, // Default value
+      join_date: firebase.firestore.Timestamp.now(), // Current timestamp
+    };
 
-  // Reset the form (double check the form ID)
-  r_e("sign_up_form").reset();
-});
+    try {
+      // Check if the email is already in use
+      const signInMethods = await auth.fetchSignInMethodsForEmail(email);
+      if (signInMethods.length > 0) {
+        alert("Email is already in use. Please use a different email.");
+        return;
+      }
 
-// Close modal when clicking on the background for Sign Up
-r_e("smodal").addEventListener("click", (e) => {
-  if (e.target.classList.contains("modal-background")) {
-    r_e("smodal").classList.remove("is-active");
-    r_e("sign_up_form").reset();
-  }
-});
+      // Create the user with Firebase Auth
+      await auth.createUserWithEmailAndPassword(email, password);
+
+      // Add user to Firestore
+      await db.collection("Members").doc(email).set(memberObj);
+
+      // Notify user and reset form
+      alert(
+        `Account created successfully! An admin must approve your account before you can access the site.`
+      );
+      document.getElementById("sign_up_form").reset();
+      document.getElementById("smodal").classList.remove("is-active");
+    } catch (error) {
+      console.error("Error during sign-up:", error);
+      alert(`Sign-up failed: ${error.message}`);
+    }
+  });
+
+// // Close modal when clicking on the background for Sign Up
+// r_e("smodal").addEventListener("click", (e) => {
+//   if (e.target.classList.contains("modal-background")) {
+//     r_e("smodal").classList.remove("is-active");
+//     r_e("sign_up_form").reset();
+//   }
+// });
 
 // User Sign In
 
@@ -115,7 +119,7 @@ r_e("sign_in_form").addEventListener("submit", (e) => {
               const firstName = data.first_name;
               const lastName = data.last_name;
               //test
-              console.log(firstName, lastName);
+              // console.log(firstName, lastName);
             });
           } else {
             console.warn(
@@ -191,19 +195,6 @@ r_e("smodal2").addEventListener("click", (e) => {
   if (e.target.classList.contains("modal-background")) {
     r_e("smodal2").classList.remove("is-active");
     r_e("sign_in_form").reset();
-  }
-});
-
-// //on auth state change
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    // when signed in, sign up/in buttons disappear and sign out button appears
-    r_e("signupbtn").classList.add("is-hidden");
-    r_e("signinbtn").classList.add("is-hidden");
-    r_e("signoutbtn").classList.remove("is-hidden");
-    // when signed in, dashboard and search pages and efunctionality no longer hidden
-    r_e("mydashboard").classList.remove("is-hidden");
-    r_e("search_page").classList.remove("is-hidden");
   }
 });
 
@@ -1228,6 +1219,71 @@ function loadPage(page, docId = null) {
     });
   } else if (page == "expanded") {
     load_expanded(docId);
+  } else if (page === "admin_dashboard") {
+    style_html = `
+      body {
+        background: linear-gradient(to top, #f6e4da, #ffdde1, #f1b3bb, #ee9ca7);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      .header {
+        background-color: rgba(251, 244, 244, 0.9);
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      .custom_columns {
+        border-radius: 10px;
+        margin: 10px;
+        align-items: center;
+        text-align: center;
+        }
+        `;
+    content = `<div>
+      <p class="has-text-danger">
+        To create the first admin account, manually update the user's collection
+        by changing the role field to "admin" for a selected user. This will
+        grant them admin privileges.
+      </p>
+    </div>
+
+    <div id="auth" class="m-2 p-3">
+      <div class="columns">
+        <!-- Unnapproved users -->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Unapproved Users</h1>
+          <div id="unregistered_users"></div>
+        </div>
+
+        <!-- Non-admin users to remove-->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Non-Admin Users (Remove)</h1>
+          <div id="registered_users_remove"></div>
+        </div>
+
+        <!-- Non-admin users to promote-->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Non-Admin Users (Promote)</h1>
+          <div id="registered_users_promote"></div>
+        </div>
+
+        <!-- admin users -->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Admin Users</h1>
+          <div id="admin_users"></div>
+        </div>
+      </div>
+    </div>`;
+
+    document.getElementById("main_content").innerHTML = content;
+    document.querySelector("style").innerHTML = style_html;
+    // ADMIN DASHBOARD CODE
+    // fill the admin dashboard
+    fetchUsers();
   }
 }
 
@@ -1548,4 +1604,185 @@ function scrollRight() {
   document
     .getElementById("carousel")
     .scrollBy({ left: 215, behavior: "smooth" });
+}
+
+//   // on auth state changed
+//   auth.onAuthStateChanged((user) => {
+//     if (user) {
+//       // Query Firestore for the document with the matching email
+//       db.collection("Members")
+//         .where("email", "==", user.email)
+//         .get()
+//         .then((querySnapshot) => {
+//           if (!querySnapshot.empty) {
+//             querySnapshot.forEach((doc) => {
+//               const userData = doc.data();
+//               if (userData.role === "admin") {
+//                 // when signed in, sign up/in buttons disappear and sign out button appears
+//                 r_e("signupbtn").classList.add("is-hidden");
+//                 r_e("signinbtn").classList.add("is-hidden");
+//                 r_e("signoutbtn").classList.remove("is-hidden");
+//                 // when signed in, dashboard, search page, and admin dashboard no longer hidden
+//                 r_e("mydashboard").classList.remove("is-hidden");
+//                 r_e("search_page").classList.remove("is-hidden");
+//                 r_e("admin_dashboard").classList.remove("is-hidden");
+//               } else if (userData.active_status === "false") {
+//                 alert(
+//                   "Please contact an admin to become approved before you can access site content."
+//                 );
+//               } else {
+//                 // when signed in, sign up/in buttons disappear and sign out button appears
+//                 r_e("signupbtn").classList.add("is-hidden");
+//                 r_e("signinbtn").classList.add("is-hidden");
+//                 r_e("signoutbtn").classList.remove("is-hidden");
+//                 // when signed in, dashboard and search page no longer hidden
+//                 r_e("mydashboard").classList.remove("is-hidden");
+//                 r_e("search_page").classList.remove("is-hidden");
+//               }
+//             });
+//           } else {
+//             console.error(
+//               "No matching document found for the authenticated user."
+//             );
+//           }
+//         })
+//         .catch((error) => {
+//           console.error("Error fetching user document:", error);
+//         });
+//     } else {
+//       console.log("No user is signed in.");
+//     }
+//   });
+// });
+
+// //on auth state change
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // when signed in, sign up/in buttons disappear and sign out button appears
+    r_e("signupbtn").classList.add("is-hidden");
+    r_e("signinbtn").classList.add("is-hidden");
+    r_e("signoutbtn").classList.remove("is-hidden");
+    // when signed in, dashboard and search pages and efunctionality no longer hidden
+    r_e("mydashboard").classList.remove("is-hidden");
+    r_e("search_page").classList.remove("is-hidden");
+    r_e("admin_dashboard").classList.remove("is-hidden");
+  }
+});
+
+// admin dashboard global functions
+// functions to change user status
+function approveUser(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ active_status: true })
+    .then(() => {
+      alert("User approved!");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error approving user:", error);
+    });
+}
+
+function makeAdmin(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ role: "admin" })
+    .then(() => {
+      alert("User promoted to Admin!");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error promoting user to Admin:", error);
+    });
+}
+
+function removeUser(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ active_status: false })
+    .then(() => {
+      alert("User removed.");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error removing user:", error);
+    });
+}
+
+function revokeAdmin(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ role: "" })
+    .then(() => {
+      alert("Admin rights revoked!");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error revoking Admin rights:", error);
+    });
+}
+
+// fill admin dashboard
+function renderUsers(snapshot, elementId, action) {
+  const container = document.getElementById(elementId);
+  let html = "";
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const firstName = data.first_name || "Unknown";
+    const lastName = data.last_name || "Unknown";
+    const email = data.email || "No Email";
+    const role = data.role || "None"; // Fallback if role is undefined
+
+    html += `
+            <p>${firstName} ${lastName} (${email})</p>
+            <button onclick="${action}('${doc.id}')">${action.replace(
+      /([A-Z])/g,
+      " $1"
+    )}</button>
+          `;
+  });
+
+  container.innerHTML = html || "<p>No users found.</p>";
+}
+
+function fetchUsers() {
+  // Clear the columns before re-rendering
+  document.getElementById("unregistered_users").innerHTML = "";
+  document.getElementById("registered_users_remove").innerHTML = "";
+  document.getElementById("registered_users_promote").innerHTML = "";
+  document.getElementById("admin_users").innerHTML = "";
+
+  // Fetch unapproved users
+  db.collection("Members")
+    .where("active_status", "==", false)
+    .get()
+    .then((snapshot) =>
+      renderUsers(snapshot, "unregistered_users", "approveUser")
+    );
+
+  // Fetch non-admin users to remove
+  db.collection("Members")
+    .where("active_status", "==", true)
+    .where("role", "==", "")
+    .get()
+    .then((snapshot) => {
+      renderUsers(snapshot, "registered_users_remove", "removeUser");
+    });
+
+  // Fetch non-admin users to promote
+  db.collection("Members")
+    .where("active_status", "==", true)
+    .where("role", "==", "")
+    .get()
+    .then((snapshot) => {
+      renderUsers(snapshot, "registered_users_promote", "makeAdmin");
+    });
+
+  // Fetch admin users
+  db.collection("Members")
+    .where("role", "==", "admin")
+    .get()
+    .then((snapshot) => renderUsers(snapshot, "admin_users", "revokeAdmin"));
 }
