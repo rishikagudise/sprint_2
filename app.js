@@ -368,7 +368,6 @@ r_e("add_modal").addEventListener("click", (e) => {
 //});
 
 // Update Calendar
-// Global Variables
 let currentDate = new Date();
 let userEvents = []; // This will store the current user's event documents
 
@@ -593,7 +592,6 @@ function nextMonth() {
 }
 
 renderCalendar();
-////////////////////////////////////////////////////////////
 
 function loadPage(page, docId = null) {
   let content = "";
