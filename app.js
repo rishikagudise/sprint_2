@@ -114,13 +114,6 @@ r_e("sign_in_form").addEventListener("submit", (e) => {
               const data = doc.data();
               const firstName = data.first_name;
               const lastName = data.last_name;
-              //show the currently signed up/signed in user's info in nav-bar
-              const infoBox = document.getElementById("navbar-user-info");
-              infoBox.innerHTML = `
-              <div>
-                <span class="has-text-weight-semibold">${firstName} ${lastName}</span><br>
-              </div>
-            `;
               //test
               console.log(firstName, lastName);
             });
@@ -242,6 +235,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   e.preventDefault();
   let first_name = r_e("alum_first_name").value;
   let last_name = r_e("alum_last_name").value;
+  let bio = r_e("alum_bio").value;
   let company = r_e("alum_company").value;
   let position = r_e("alum_position").value;
   let major = r_e("alum_major").value;
@@ -257,6 +251,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   let alum_obj = {
     first_name: first_name,
     last_name: last_name,
+    bio: bio,
     company: company,
     current_position: position,
     major: major,
@@ -275,6 +270,7 @@ r_e("alumni_form").addEventListener("submit", async (e) => {
   //actually inserting into the db collection - alumni!!!
   try {
     await db.collection("Alumni").add(alum_obj);
+    alert("alum added successfully");
   } catch (error) {
     alert(`${error}`);
     return;
@@ -307,65 +303,6 @@ r_e("add_modal").addEventListener("click", (e) => {
     r_e("alumni_form").reset();
   }
 });
-
-// r_e("searchbar").addEventListener("submit", (e) => {
-//   e.preventDefault();
-//   console.log("clicked");
-
-// const gradYear = r_e("grad_filter").value;
-// const major = r_e("major_filter").value;
-// const location = r_e("location_filter").value.toLowerCase();
-// const industry = r_e("industry_filter").value;
-// const company = r_e("company_filter").value.toLowerCase();
-
-// const resultsContainer = r_e("alumni-results");
-// resultsContainer.innerHTML = ""; // Clear existing results
-
-// db.collection("Alumni")
-//   .get()
-//   .then((querySnapshot) => {
-//     querySnapshot.forEach((doc) => {
-//       const data = doc.data();
-//       let match = true;
-
-//       if (gradYear !== "All" && data.graduation_year != gradYear)
-//         match = false;
-//       if (major !== "All" && data.major !== major) match = false;
-//       if (industry !== "All" && data.industry !== industry) match = false;
-
-//       if (
-//         location &&
-//         !(data.city && data.city.toLowerCase().includes(location)) &&
-//         !(data.state && data.state.toLowerCase().includes(location))
-//       ) {
-//         match = false;
-//       }
-
-//       if (
-//         company &&
-//         !(data.company && data.company.toLowerCase().includes(company))
-//       ) {
-//         match = false;
-//       }
-
-//       if (match) {
-//         const fullName = `${data.first_name} ${data.last_name}`;
-//         const image = "test.png"; // replace if photo URL available
-
-//         const cardHTML = `
-//           <div class="profile-card column is-one-quarter" onclick="loadPage('expanded', '${
-//             doc.id
-//           }')">
-//             <img src="${image}" class="profile-img" />
-//             <h3>${fullName}</h3>
-//             <p>${data.company || "Unknown Company"}</p>
-//           </div>
-//         `;
-//         resultsContainer.innerHTML += cardHTML;
-//       }
-//     });
-//   });
-//});
 
 // Update Calendar
 let currentDate = new Date();
@@ -592,6 +529,11 @@ function nextMonth() {
 }
 
 renderCalendar();
+
+//test commit
+function deleteEvent(key, index) {
+  events[key].splice(index, 1);
+}
 
 function loadPage(page, docId = null) {
   let content = "";
@@ -1102,6 +1044,11 @@ function loadPage(page, docId = null) {
             <option>2022</option>
             <option>2021</option>
             <option>2020</option>
+            <option>2019</option>
+            <option>2018</option>
+            <option>2017</option>
+            <option>2016</option>
+            <option>2015</option>
           </select>
         </div>
       </div>
@@ -1119,6 +1066,17 @@ function loadPage(page, docId = null) {
             <option>Data Science</option>
           </select>
         </div>
+      </div>
+
+      <!-- University -->
+      <div class="column is-one-quarter">
+        <label class="label">University</label>
+        <input
+          id="university_filter"
+          class="input"
+          type="text"
+          placeholder="Enter a University"
+        />
       </div>
 
       <!-- State -->
@@ -1186,6 +1144,7 @@ function loadPage(page, docId = null) {
       const searchBar = r_e("searchInpt").value;
       const gradYear = r_e("grad_filter").value;
       const major = r_e("major_filter").value;
+      const university = r_e("university_filter").value.toLowerCase();
       const state = r_e("state_filter").value.toLowerCase();
       const city = r_e("city_filter").value.toLowerCase();
       const industry = r_e("industry_filter").value;
@@ -1227,6 +1186,16 @@ function loadPage(page, docId = null) {
             }
 
             if (
+              university &&
+              !(
+                data.university &&
+                data.university.toLowerCase().includes(university)
+              )
+            ) {
+              match = false;
+            }
+
+            if (
               city &&
               !(data.city && data.city.toLowerCase().includes(city))
             ) {
@@ -1259,18 +1228,6 @@ function loadPage(page, docId = null) {
         });
     });
   } else if (page == "expanded") {
-    //might need to change this method of dynamically gathering information because we prolly
-    //make use of firebase db.
-    // document
-    //   .getElementById("carousel")
-    //   .addEventListener("click", function (event) {
-    //     let card = event.target.closest(".profile-card");
-    //     if (card) {
-    //       let full_name = card.querySelector("h3").textContent;
-    //       let company = card.querySelector("p").textContent;
-    //       load_expanded(full_name, company);
-    //     }
-    //   });
     load_expanded(docId);
   }
 }
@@ -1290,7 +1247,12 @@ function load_expanded(docId) {
       const company = data.company || "NA";
       const position = data.current_position || "NA";
       const about = data.bio || "NA"; //need to add this in the doc???
+      const city = data.city || "NA";
+      const state = data.state || "NA";
       const education = `${data.degree} at ${data.university}` || "NA";
+      const major = data.major || "NA";
+      const grad_yr = data.graduation_year || "NA";
+      const industry = data.industry || "NA";
       const email = data.contact_info.email || "NA";
       const linkedin = data.contact_info.linkedin || "NA";
       const image = "test.png";
@@ -1367,10 +1329,16 @@ function load_expanded(docId) {
         <div class="profile-photo">
           <img src="${image}" alt="${name}" />
         </div>
+        
         <div class="profile-details">
           <h2>${name}</h2>
           <p><strong>Company:</strong> ${company}</p>
           <p><strong>Position:</strong> ${position}</p>
+
+          <div class="info-section">
+            <h3>Industry</h3>
+            <p>${industry}</p>
+          </div>
 
           <div class="info-section">
             <h3>About</h3>
@@ -1378,8 +1346,23 @@ function load_expanded(docId) {
           </div>
 
           <div class="info-section">
+            <h3>Location</h3>
+            <p>${city},${state}</p>
+          </div>
+
+          <div class="info-section">
             <h3>Education</h3>
             <p>${education}</p>
+          </div>
+
+          <div class="info-section">
+            <h3>Major</h3>
+            <p>${major}</p>
+          </div>
+          
+          <div class="info-section">
+            <h3>Graduation Year</h3>
+            <p>${grad_yr}</p>
           </div>
 
           <div class="info-section contact-info">
@@ -1406,6 +1389,8 @@ function load_expanded(docId) {
             placeholder="Write your notes here..."
             rows="10"
           ></textarea>
+          <br />
+    <button class="button is-success mt-2" id="saveNotesBtn">Save Notes</button>
         </div>
       </section>
     `;
@@ -1458,65 +1443,99 @@ function load_expanded(docId) {
             removeBtn.style.display = "inline-block";
           });
 
-          // ✅ Remove button
+          // Remove button
           removeBtn.addEventListener("click", async () => {
             await memberRef.update({
               saved_alumni:
                 firebase.firestore.FieldValue.arrayRemove(alumniRef),
             });
 
-            alert("❌ Removed from dashboard!");
+            // ALSO remove the related notes - if there are any!
+            const notesSnapshot = await memberRef
+              .collection("notes")
+              .where("alumni_id", "==", alumniId)
+              .get();
+
+            const batch = db.batch();
+            notesSnapshot.forEach((noteDoc) => {
+              batch.delete(noteDoc.ref);
+            });
+
+            await batch.commit();
+
+            alert("Alumni removed and associated notes deleted!");
 
             // Reload the expanded page to reflect the change
             load_expanded(alumniId);
           });
         } else {
-          alert("⚠️ Member profile not found.");
+          alert("Member profile not found.");
+        }
+        const notesArea = r_e("notes");
+        const saveNotesBtn = r_e("saveNotesBtn");
+
+        if (!auth.currentUser) {
+          notesArea.disabled = true;
+          saveNotesBtn.style.display = "none";
+          return;
+        }
+
+        if (!memberSnapshot.empty) {
+          const memberDoc = memberSnapshot.docs[0];
+          const memberRef = memberDoc.ref;
+          const savedAlumni = memberDoc.data().saved_alumni || [];
+
+          const alumniRef = db.collection("Alumni").doc(docId);
+
+          const alreadySaved = savedAlumni.some((ref) => ref.id === docId);
+
+          if (!alreadySaved) {
+            notesArea.disabled = true;
+            saveNotesBtn.style.display = "none";
+            return;
+          }
+
+          //Keep track of whether a note document already exists
+          let existingNoteDocId = null;
+
+          const notesSnapshot = await memberRef
+            .collection("notes")
+            .where("alumni_id", "==", docId)
+            .limit(1)
+            .get();
+
+          if (!notesSnapshot.empty) {
+            const noteDoc = notesSnapshot.docs[0];
+            notesArea.value = noteDoc.data().content;
+            existingNoteDocId = noteDoc.id; // 💡 save the document ID for future updating
+          }
+
+          //Save notes
+          saveNotesBtn.addEventListener("click", async () => {
+            const newNoteContent = notesArea.value;
+
+            if (existingNoteDocId) {
+              //Update existing document
+              await memberRef
+                .collection("notes")
+                .doc(existingNoteDocId)
+                .update({
+                  content: newNoteContent,
+                });
+            } else {
+              //Add new document if none exists yet
+              const newDocRef = await memberRef.collection("notes").add({
+                alumni_id: docId,
+                content: newNoteContent,
+              });
+
+              existingNoteDocId = newDocRef.id; // update for future saves
+            }
+
+            alert("Notes saved successfully!");
+          });
         }
       }, 0);
-
-      // setTimeout(async () => {
-      //   const saveBtn = document.getElementById("saveAlumBtn");
-      //   const alumniId = docId;
-
-      //   if (!auth.currentUser) return;
-
-      //   const memberSnapshot = await db
-      //     .collection("Members")
-      //     .where("email", "==", auth.currentUser.email)
-      //     .limit(1)
-      //     .get();
-
-      //   if (!memberSnapshot.empty) {
-      //     const memberDoc = memberSnapshot.docs[0];
-      //     const memberRef = memberDoc.ref;
-      //     const savedAlumni = memberDoc.data().saved_alumni || [];
-
-      //     // Check if this alumniRef already exists in saved_alumni
-      //     const alreadySaved = savedAlumni.some((ref) => ref.id === alumniId);
-
-      //     if (alreadySaved) {
-      //       saveBtn.disabled = true;
-      //       saveBtn.innerText = "✔️ Already Added";
-      //     }
-
-      //     // Button click to add if not already saved
-      //     saveBtn.addEventListener("click", async () => {
-      //       if (alreadySaved) return;
-
-      //       const alumniRef = db.collection("Alumni").doc(alumniId);
-      //       await memberRef.update({
-      //         saved_alumni: firebase.firestore.FieldValue.arrayUnion(alumniRef),
-      //       });
-
-      //       alert("Alumni saved to your dashboard!");
-      //       saveBtn.disabled = true;
-      //       saveBtn.innerText = "✔️ Already Added";
-      //     });
-      //   } else {
-      //     alert("Member not found.");
-      //   }
-      // }, 0);
     }); // <- this closes .then()
 }
 
