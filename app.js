@@ -437,7 +437,6 @@ async function saveEvent() {
         events_attended: firebase.firestore.FieldValue.arrayUnion(eventRef),
       });
     }
-
     alert("Event successfully added!");
     closeModal();
     loadUserEvents();
@@ -530,10 +529,10 @@ function nextMonth() {
 
 renderCalendar();
 
-//test commit
-function deleteEvent(key, index) {
-  events[key].splice(index, 1);
-}
+// //test commit
+// function deleteEvent(key, index) {
+//   events[key].splice(index, 1);
+// }
 
 function loadPage(page, docId = null) {
   let content = "";
