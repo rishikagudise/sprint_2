@@ -1606,66 +1606,62 @@ function scrollRight() {
     .scrollBy({ left: 215, behavior: "smooth" });
 }
 
-//   // on auth state changed
-//   auth.onAuthStateChanged((user) => {
-//     if (user) {
-//       // Query Firestore for the document with the matching email
-//       db.collection("Members")
-//         .where("email", "==", user.email)
-//         .get()
-//         .then((querySnapshot) => {
-//           if (!querySnapshot.empty) {
-//             querySnapshot.forEach((doc) => {
-//               const userData = doc.data();
-//               if (userData.role === "admin") {
-//                 // when signed in, sign up/in buttons disappear and sign out button appears
-//                 r_e("signupbtn").classList.add("is-hidden");
-//                 r_e("signinbtn").classList.add("is-hidden");
-//                 r_e("signoutbtn").classList.remove("is-hidden");
-//                 // when signed in, dashboard, search page, and admin dashboard no longer hidden
-//                 r_e("mydashboard").classList.remove("is-hidden");
-//                 r_e("search_page").classList.remove("is-hidden");
-//                 r_e("admin_dashboard").classList.remove("is-hidden");
-//               } else if (userData.active_status === "false") {
-//                 alert(
-//                   "Please contact an admin to become approved before you can access site content."
-//                 );
-//               } else {
-//                 // when signed in, sign up/in buttons disappear and sign out button appears
-//                 r_e("signupbtn").classList.add("is-hidden");
-//                 r_e("signinbtn").classList.add("is-hidden");
-//                 r_e("signoutbtn").classList.remove("is-hidden");
-//                 // when signed in, dashboard and search page no longer hidden
-//                 r_e("mydashboard").classList.remove("is-hidden");
-//                 r_e("search_page").classList.remove("is-hidden");
-//               }
-//             });
-//           } else {
-//             console.error(
-//               "No matching document found for the authenticated user."
-//             );
-//           }
-//         })
-//         .catch((error) => {
-//           console.error("Error fetching user document:", error);
-//         });
-//     } else {
-//       console.log("No user is signed in.");
-//     }
-//   });
-// });
-
-// //on auth state change
+// on auth state changed
 auth.onAuthStateChanged((user) => {
   if (user) {
-    // when signed in, sign up/in buttons disappear and sign out button appears
-    r_e("signupbtn").classList.add("is-hidden");
-    r_e("signinbtn").classList.add("is-hidden");
-    r_e("signoutbtn").classList.remove("is-hidden");
-    // when signed in, dashboard and search pages and efunctionality no longer hidden
-    r_e("mydashboard").classList.remove("is-hidden");
-    r_e("search_page").classList.remove("is-hidden");
-    r_e("admin_dashboard").classList.remove("is-hidden");
+    // Query Firestore for the document with the matching email
+    db.collection("Members")
+      .where("email", "==", user.email)
+      .get()
+      .then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((doc) => {
+            const userData = doc.data();
+            if (userData.role === "admin") {
+              // when signed in, sign up/in buttons disappear and sign out button appears
+              r_e("signupbtn").classList.add("is-hidden");
+              r_e("signinbtn").classList.add("is-hidden");
+              r_e("signoutbtn").classList.remove("is-hidden");
+              // when signed in, dashboard, search page, and admin dashboard no longer hidden
+              r_e("mydashboard").classList.remove("is-hidden");
+              r_e("search_page").classList.remove("is-hidden");
+              r_e("admin_dashboard").classList.remove("is-hidden");
+            } else if (userData.active_status === false) {
+              alert(
+                "Please contact an admin to become approved before you can access site content."
+              );
+              // Sign out the user
+              auth
+                .signOut()
+                .then(() => {
+                  console.log(
+                    "User has been signed out due to inactive status."
+                  );
+                })
+                .catch((error) => {
+                  console.error("Error signing out user:", error);
+                });
+            } else {
+              // when signed in, sign up/in buttons disappear and sign out button appears
+              r_e("signupbtn").classList.add("is-hidden");
+              r_e("signinbtn").classList.add("is-hidden");
+              r_e("signoutbtn").classList.remove("is-hidden");
+              // when signed in, dashboard and search page no longer hidden
+              r_e("mydashboard").classList.remove("is-hidden");
+              r_e("search_page").classList.remove("is-hidden");
+            }
+          });
+        } else {
+          console.error(
+            "No matching document found for the authenticated user."
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching user document:", error);
+      });
+  } else {
+    console.log("No user is signed in.");
   }
 });
 
