@@ -368,10 +368,12 @@ r_e("add_modal").addEventListener("click", (e) => {
 //});
 
 // Update Calendar
+// Global Variables
 let currentDate = new Date();
-let events = {};
+let userEvents = []; // This will store the current user's event documents
 
-function renderCalendar() {
+// Render Calendar
+async function renderCalendar() {
   const calendarDays = document.getElementById("calendar-days");
   const monthYear = document.getElementById("month-year");
   calendarDays.innerHTML = "";
@@ -388,15 +390,18 @@ function renderCalendar() {
   let firstDay = new Date(year, month, 1).getDay();
   let lastDate = new Date(year, month + 1, 0).getDate();
 
+  // Empty slots before the first day
   for (let i = 0; i < firstDay; i++) {
     let emptyDiv = document.createElement("div");
     calendarDays.appendChild(emptyDiv);
   }
 
+  // Render days
   for (let day = 1; day <= lastDate; day++) {
     let dayDiv = document.createElement("div");
     dayDiv.innerText = day;
     dayDiv.classList.add("day");
+
     if (
       year === today.getFullYear() &&
       month === today.getMonth() &&
@@ -404,71 +409,191 @@ function renderCalendar() {
     ) {
       dayDiv.classList.add("current-day");
     }
+
     dayDiv.addEventListener("click", () => openModal(day));
 
-    let key = `${year}-${month}-${day}`;
-    if (events[key]) {
-      events[key].forEach((eventObj, index) => {
+    // Render Events for this day
+    const formattedDate = `${year}-${String(month + 1).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`;
+    userEvents.forEach((event) => {
+      if (event.date === formattedDate) {
         let eventDiv = document.createElement("div");
-        eventDiv.innerText = `${eventObj.startTime} - ${eventObj.endTime}: ${eventObj.description}`;
+        eventDiv.innerText = `${event.start_time} - ${event.end_time}: ${event.name}`;
         eventDiv.classList.add("event");
+
         eventDiv.addEventListener("click", (e) => {
           e.stopPropagation();
           if (confirm("Do you want to delete this event?")) {
-            deleteEvent(key, index);
+            deleteEvent(event.id);
           }
         });
+
         dayDiv.appendChild(eventDiv);
-      });
-    }
+      }
+    });
 
     calendarDays.appendChild(dayDiv);
   }
 }
 
+// Open Event Modal
+function openModal(day) {
+  const modal = document.getElementById("event-modal");
+  modal.classList.add("is-active");
+  r_e("event-day").value = day;
+  r_e("start-time").value = "";
+  r_e("end-time").value = "";
+  r_e("event-desc").value = "";
+  r_e("event-name").value = "";
+  r_e("event-location").value = "";
+  r_e("event-is-virtual").checked = false;
+}
+
+// Close Modal
+function closeModal() {
+  document.getElementById("event-modal").classList.remove("is-active");
+}
+
+// Save Event
+async function saveEvent() {
+  let day = r_e("event-day").value;
+  let startTime = r_e("start-time").value;
+  let endTime = r_e("end-time").value;
+  let description = r_e("event-desc").value;
+  let name = r_e("event-name").value;
+  let location = r_e("event-location").value;
+  let isVirtual = r_e("event-is-virtual").checked;
+
+  if (!startTime || !endTime || !description || !name || !location) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  const formattedDate = `${currentDate.getFullYear()}-${String(
+    currentDate.getMonth() + 1
+  ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+  try {
+    // Add event to Events collection
+    const eventRef = await db.collection("Events").add({
+      date: formattedDate,
+      start_time: startTime,
+      end_time: endTime,
+      description: description,
+      is_virtual: isVirtual,
+      location: location,
+      name: name,
+      participants: [auth.currentUser.uid], // We'll use uid here
+    });
+
+    // Add event to user's Member document
+    const memberSnapshot = await db
+      .collection("Members")
+      .where("email", "==", auth.currentUser.email)
+      .limit(1)
+      .get();
+
+    if (!memberSnapshot.empty) {
+      const memberDoc = memberSnapshot.docs[0];
+      await memberDoc.ref.update({
+        events_attended: firebase.firestore.FieldValue.arrayUnion(eventRef),
+      });
+    }
+
+    alert("Event successfully added!");
+    closeModal();
+    loadUserEvents();
+  } catch (error) {
+    console.error("Error saving event: ", error);
+    alert("Failed to save event.");
+  }
+}
+
+// Load User's Events
+async function loadUserEvents() {
+  if (!auth.currentUser) return;
+
+  try {
+    const memberSnapshot = await db
+      .collection("Members")
+      .where("email", "==", auth.currentUser.email)
+      .limit(1)
+      .get();
+
+    if (!memberSnapshot.empty) {
+      const memberDoc = memberSnapshot.docs[0];
+      const eventsRefs = memberDoc.data().events_attended || [];
+      userEvents = [];
+
+      for (let ref of eventsRefs) {
+        const eventDoc = await ref.get();
+        if (eventDoc.exists) {
+          userEvents.push({
+            id: eventDoc.id,
+            ...eventDoc.data(),
+          });
+        }
+      }
+
+      renderCalendar();
+    }
+  } catch (error) {
+    console.error("Error loading events:", error);
+  }
+}
+
+// Delete Event
+async function deleteEvent(eventId) {
+  if (!auth.currentUser) return;
+
+  try {
+    // Delete event document
+    await db.collection("Events").doc(eventId).delete();
+
+    // Remove event reference from user's Member document
+    const memberSnapshot = await db
+      .collection("Members")
+      .where("email", "==", auth.currentUser.email)
+      .limit(1)
+      .get();
+
+    if (!memberSnapshot.empty) {
+      const memberDoc = memberSnapshot.docs[0];
+      const eventRef = db.collection("Events").doc(eventId);
+      await memberDoc.ref.update({
+        events_attended: firebase.firestore.FieldValue.arrayRemove(eventRef),
+      });
+    }
+
+    alert("Event deleted!");
+    loadUserEvents();
+  } catch (error) {
+    console.error("Error deleting event:", error);
+  }
+}
+
+// Initialize Calendar After Sign In
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    loadUserEvents();
+  }
+});
+
+// Month Navigation
 function prevMonth() {
   currentDate.setMonth(currentDate.getMonth() - 1);
   renderCalendar();
 }
+
 function nextMonth() {
   currentDate.setMonth(currentDate.getMonth() + 1);
   renderCalendar();
 }
 
-function openModal(day) {
-  document.getElementById("event-day").value = day;
-  document.getElementById("start-time").value = "";
-  document.getElementById("end-time").value = "";
-  document.getElementById("event-desc").value = "";
-  document.getElementById("event-modal").classList.add("is-active");
-}
-
-function closeModal() {
-  document.getElementById("event-modal").classList.remove("is-active");
-}
-
-function saveEvent() {
-  let day = document.getElementById("event-day").value;
-  let startTime = document.getElementById("start-time").value;
-  let endTime = document.getElementById("end-time").value;
-  let description = document.getElementById("event-desc").value;
-
-  if (!startTime || !endTime || !description)
-    return alert("Please fill in all fields.");
-
-  let key = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`;
-  if (!events[key]) events[key] = [];
-  events[key].push({ startTime, endTime, description });
-  closeModal();
-  renderCalendar();
-}
-
-function deleteEvent(key, index) {
-  events[key].splice(index, 1);
-  renderCalendar();
-}
-
 renderCalendar();
+////////////////////////////////////////////////////////////
 
 function loadPage(page, docId = null) {
   let content = "";
@@ -704,6 +829,17 @@ function loadPage(page, docId = null) {
         <section class="modal-card-body">
           <input type="hidden" id="event-day" />
           <div class="field">
+            <label class="label">Event Name</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                id="event-name"
+                placeholder="Event Title"
+              />
+            </div>
+          </div>
+          <div class="field">
             <label class="label">Start Time</label>
             <div class="control">
               <input
@@ -732,9 +868,26 @@ function loadPage(page, docId = null) {
                 class="input"
                 type="text"
                 id="event-desc"
-                placeholder="Meeting"
+                placeholder="Meeting Details"
               />
             </div>
+          </div>
+          <div class="field">
+            <label class="label">Location</label>
+            <div class="control">
+              <input
+                class="input"
+                type="text"
+                id="event-location"
+                placeholder="Zoom / Office Room"
+              />
+            </div>
+          </div>
+          <div class="field">
+            <label class="checkbox">
+              <input type="checkbox" id="event-is-virtual" />
+              Virtual Event
+            </label>
           </div>
         </section>
         <footer class="modal-card-foot">
