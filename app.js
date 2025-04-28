@@ -1262,13 +1262,13 @@ function loadPage(page, docId = null) {
 
         <!-- Non-admin users to remove-->
         <div class="column custom_columns has-background-danger-light">
-          <h1 class="title">Remove Non-Admin Users</h1>
+          <h1 class="title">Non-Admin Users (Remove)</h1>
           <div id="registered_users_remove"></div>
         </div>
 
         <!-- Non-admin users to promote-->
         <div class="column custom_columns has-background-danger-light">
-          <h1 class="title">Promote Non-Admin Users</h1>
+          <h1 class="title">Non-Admin Users (Promote)</h1>
           <div id="registered_users_promote"></div>
         </div>
 
