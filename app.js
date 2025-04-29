@@ -1245,7 +1245,7 @@ function loadPage(page, docId = null) {
         `;
     content = `<div>
       <p class="has-text-danger">
-        To create the first admin account, manually update the user's collection
+        To create the first admin account, manually update the Members collection
         by changing the role field to "admin" for a selected user. This will
         grant them admin privileges.
       </p>
