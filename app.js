@@ -2,6 +2,7 @@
 // document.addEventListener("DOMContentLoaded", function () {
 //   loadPage("home"); // Load the home page by default
 // });
+
 // a function to return elements by their IDs
 function r_e(id) {
   return document.querySelector(`#${id}`);
@@ -31,65 +32,68 @@ auth.onAuthStateChanged((user) => {
 });
 
 // User Sign Up
-r_e("sign_up_form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  let first_name = r_e("member_first_name").value;
-  let last_name = r_e("member_last_name").value;
-  let email = r_e("sign_up_email").value;
-  let password = r_e("sign_up_pass").value;
+document
+  .getElementById("sign_up_form")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  let member_obj = {
-    first_name: first_name,
-    last_name: last_name,
-    email: email,
-    password: password,
-    role: "",
-    active_status: true,
-    events_attended: null,
-    saved_alumni: [],
-    join_date: firebase.firestore.Timestamp.now(),
-  };
+    // Collect user input
+    const firstName = document.getElementById("member_first_name").value.trim();
+    const lastName = document.getElementById("member_last_name").value.trim();
+    const email = document.getElementById("sign_up_email").value.trim();
+    const password = document.getElementById("sign_up_pass").value.trim();
 
-  try {
-    // Check if the email is already in use
-    await auth.fetchSignInMethodsForEmail(email);
-    // If no error occurs, it means the email is not in use
-  } catch (error) {
-    // Handle the case where the email is already in use
-    alert("Email is already in use. Please try again.");
-    return; // Return to stop further execution
-  }
+    // Validate input (optional, but recommended)
+    if (!firstName || !lastName || !email || !password) {
+      alert("All fields are required. Please complete the form.");
+      return;
+    }
 
-  try {
-    // Attempt to create the user with the actual password
-    await auth.createUserWithEmailAndPassword(email, password);
-    //adding information to the db.collection - "Members
-    await db.collection("Members").add(member_obj);
-    // User creation successful
-    alert(`Account ${auth.currentUser.email} has been created`);
-    // Reset the form
-    r_e("sign_up_form").reset();
-    // Close the modal
-    r_e("smodal").classList.remove("is-active");
-  } catch (error) {
-    // Handle other errors during user creation
-    alert(`${error}`);
-    r_e("smodal").classList.remove("is-active");
-    r_e("sign_up_form").reset();
-    return; // Return to stop further execution
-  }
+    // User object for Firestore
+    const memberObj = {
+      first_name: firstName,
+      last_name: lastName,
+      email: email,
+      password: password, // Store hashed passwords in production
+      role: "", // Default role
+      active_status: false, // Require admin approval
+      events_attended: null, // Default value
+      join_date: firebase.firestore.Timestamp.now(), // Current timestamp
+    };
 
-  // Reset the form (double check the form ID)
-  r_e("sign_up_form").reset();
-});
+    try {
+      // Check if the email is already in use
+      const signInMethods = await auth.fetchSignInMethodsForEmail(email);
+      if (signInMethods.length > 0) {
+        alert("Email is already in use. Please use a different email.");
+        return;
+      }
 
-// Close modal when clicking on the background for Sign Up
-r_e("smodal").addEventListener("click", (e) => {
-  if (e.target.classList.contains("modal-background")) {
-    r_e("smodal").classList.remove("is-active");
-    r_e("sign_up_form").reset();
-  }
-});
+      // Create the user with Firebase Auth
+      await auth.createUserWithEmailAndPassword(email, password);
+
+      // Add user to Firestore
+      await db.collection("Members").doc(email).set(memberObj);
+
+      // Notify user and reset form
+      alert(
+        `Account created successfully! An admin must approve your account before you can access the site.`
+      );
+      document.getElementById("sign_up_form").reset();
+      document.getElementById("smodal").classList.remove("is-active");
+    } catch (error) {
+      console.error("Error during sign-up:", error);
+      alert(`Sign-up failed: ${error.message}`);
+    }
+  });
+
+// // Close modal when clicking on the background for Sign Up
+// r_e("smodal").addEventListener("click", (e) => {
+//   if (e.target.classList.contains("modal-background")) {
+//     r_e("smodal").classList.remove("is-active");
+//     r_e("sign_up_form").reset();
+//   }
+// });
 
 // User Sign In
 
@@ -115,7 +119,7 @@ r_e("sign_in_form").addEventListener("submit", (e) => {
               const firstName = data.first_name;
               const lastName = data.last_name;
               //test
-              console.log(firstName, lastName);
+              // console.log(firstName, lastName);
             });
           } else {
             console.warn(
@@ -194,19 +198,6 @@ r_e("smodal2").addEventListener("click", (e) => {
   }
 });
 
-// //on auth state change
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    // when signed in, sign up/in buttons disappear and sign out button appears
-    r_e("signupbtn").classList.add("is-hidden");
-    r_e("signinbtn").classList.add("is-hidden");
-    r_e("signoutbtn").classList.remove("is-hidden");
-    // when signed in, dashboard and search pages and efunctionality no longer hidden
-    r_e("mydashboard").classList.remove("is-hidden");
-    r_e("search_page").classList.remove("is-hidden");
-  }
-});
-
 // Sign-Up Modal Functionality
 let signupbtn = document.querySelector("#signupbtn");
 signupbtn.addEventListener("click", () => {
@@ -221,87 +212,6 @@ let signinbtn = document.querySelector("#signinbtn");
 signinbtn.addEventListener("click", () => {
   let sign_in_modal = document.querySelector("#smodal2");
   sign_in_modal.classList.add("is-active");
-});
-
-//Add Alumni Profile Modal Functionality
-document.body.addEventListener("click", (event) => {
-  if (event.target && event.target.id === "add_profile_btn") {
-    let addProfileModal = document.querySelector("#add_modal");
-    addProfileModal.classList.add("is-active");
-  }
-});
-
-r_e("alumni_form").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  let first_name = r_e("alum_first_name").value;
-  let last_name = r_e("alum_last_name").value;
-  let bio = r_e("alum_bio").value;
-  let company = r_e("alum_company").value;
-  let position = r_e("alum_position").value;
-  let major = r_e("alum_major").value;
-  let university = r_e("alum_university").value;
-  let industry = r_e("alum_industry").value;
-  let degree = r_e("alum_degree").value;
-  let city = r_e("alum_city").value;
-  let state = r_e("alum_state").value;
-  let grad_yr = r_e("alum_grad_yr").value;
-  let email = r_e("alum_email").value;
-  let linkedin = r_e("alum_linkedin").value;
-
-  let alum_obj = {
-    first_name: first_name,
-    last_name: last_name,
-    bio: bio,
-    company: company,
-    current_position: position,
-    major: major,
-    university: university,
-    industry: industry,
-    degree: degree,
-    city: city,
-    state: state,
-    graduation_year: grad_yr,
-    contact_info: {
-      email: email,
-      linkedin: linkedin,
-    },
-  };
-
-  //actually inserting into the db collection - alumni!!!
-  try {
-    await db.collection("Alumni").add(alum_obj);
-    alert("alum added successfully");
-  } catch (error) {
-    alert(`${error}`);
-    return;
-  }
-  r_e("alumni_form").reset();
-
-  // Create a new profile card
-  let alumCard = document.createElement("div");
-  alumCard.classList.add("profile-card");
-  alumCard.setAttribute("onclick", "loadPage('expanded')");
-
-  alumCard.innerHTML = `
-    <img src="test.png" class="profile-img" alt="Profile Image" />
-    <h3>${first_name} ${last_name}</h3>
-    <p>${company}</p>
-`;
-
-  // Append the card to the carousel
-  document.querySelector("#carousel").appendChild(alumCard);
-
-  // Reset the form after submitting
-  document.querySelector("#alumni_form").reset();
-  document.querySelector("#add_modal").classList.remove("is-active");
-});
-
-// Close modal when clicking on the background for Add Alumni Profile Modal
-r_e("add_modal").addEventListener("click", (e) => {
-  if (e.target.classList.contains("modal-background")) {
-    r_e("add_modal").classList.remove("is-active");
-    r_e("alumni_form").reset();
-  }
 });
 
 // Update Calendar
@@ -437,7 +347,6 @@ async function saveEvent() {
         events_attended: firebase.firestore.FieldValue.arrayUnion(eventRef),
       });
     }
-
     alert("Event successfully added!");
     closeModal();
     loadUserEvents();
@@ -1001,9 +910,6 @@ function loadPage(page, docId = null) {
       }
     `;
     content = `
-    <a class="button mr-3 custom_db" id="add_profile_btn"
-      ><b>Add a Profile</b></a
-    >
     <br></br>
         <form id="searchbar" class="mb-6 mx-6">
   <!-- Search + Submit -->
@@ -1225,6 +1131,367 @@ function loadPage(page, docId = null) {
     });
   } else if (page == "expanded") {
     load_expanded(docId);
+  } else if (page === "admin_dashboard") {
+    style_html = `
+      body {
+        background: linear-gradient(to top, #f6e4da, #ffdde1, #f1b3bb, #ee9ca7);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+      }
+
+      .header {
+        background-color: rgba(251, 244, 244, 0.9);
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+      .custom_columns {
+        border-radius: 10px;
+        margin: 10px;
+        align-items: center;
+        text-align: center;
+        }
+        `;
+    content = `<div>
+      <p class="has-text-danger">
+        To create the first admin account, manually update the Members collection
+        by changing the role field to "admin" for a selected user. This will
+        grant them admin privileges.
+      </p>
+    </div>
+<br>
+    <a class="button mr-3 custom_db" id="add_profile_btn"
+      ><b>Add an Alumni to the Database!</b></a
+    >
+<br>
+    <!-- Add Profile Modal? -->
+    <div class="modal" id="add_modal">
+      <div class="modal-background" id="modalbg"></div>
+      <div class="modal-content has-background-white p-4 model-aes">
+        <p class="is-size-4 has-text-weight-semibold has-text-centered">
+          Add an Alumni Profile to your Dashboard!
+        </p>
+        <form id="alumni_form">
+          <!-- first name -->
+          <div class="field">
+            <label class="label">First Name</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_first_name"
+                type="text"
+                placeholder="first name"
+              />
+            </div>
+          </div>
+          <!-- last name (text) -->
+          <div class="field">
+            <label class="label">Last Name</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_last_name"
+                type="text"
+                placeholder="last name"
+              />
+            </div>
+          </div>
+          <!-- about (text) -->
+          <div class="field">
+            <label class="label">About/Bio</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_bio"
+                type="text"
+                placeholder="About the Alum"
+              />
+            </div>
+          </div>
+          <!-- company name (text) -->
+          <div class="field">
+            <label class="label">Company</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_company"
+                type="text"
+                placeholder="company name"
+              />
+            </div>
+          </div>
+          <!-- position (text) -->
+          <div class="field">
+            <label class="label">Position</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_position"
+                type="text"
+                placeholder="position"
+              />
+            </div>
+          </div>
+          <!-- major (text) -->
+          <div class="field">
+            <label class="label">Major</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_major"
+                type="text"
+                placeholder="major"
+              />
+            </div>
+          </div>
+
+          <!-- University (text) -->
+          <div class="field">
+            <label class="label">University</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_university"
+                type="text"
+                placeholder="major"
+              />
+            </div>
+          </div>
+
+          <!-- industry (select) -->
+          <div class="field">
+            <label class="label">Industry</label>
+            <div class="select is-fullwidth">
+              <select id="alum_industry">
+                <option>Medicine</option>
+                <option>Finance</option>
+                <option>Technology</option>
+                <option>Health Care</option>
+                <option>Enviornment</option>
+                <option>Education</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <!-- degree (select) -->
+          <div class="field">
+            <label class="label">Degree</label>
+            <div class="select is-fullwidth">
+              <select id="alum_degree">
+                <option>BBA</option>
+                <option>BA</option>
+                <option>BS</option>
+                <option>B.Eng</option>
+                <option>B.S.N</option>
+                <option>B.Des</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <!-- city (text) -->
+          <div class="field">
+            <label class="label">City</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_city"
+                type="text"
+                placeholder="city"
+              />
+            </div>
+          </div>
+          <!-- state (text) -->
+          <div class="field">
+            <label class="label">State</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_state"
+                type="text"
+                placeholder="state"
+              />
+            </div>
+          </div>
+          <!-- graduation year (number) -->
+          <div class="field">
+            <label class="label">Graduation Year</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_grad_yr"
+                type="number"
+                placeholder="year"
+              />
+            </div>
+          </div>
+          <!-- email (text) -->
+          <div class="field">
+            <label class="label">Email</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_email"
+                type="text"
+                placeholder="email"
+              />
+            </div>
+          </div>
+          <!-- linkedin (text) -->
+          <div class="field">
+            <label class="label">Linkedin</label>
+            <div class="control has-icons-left has-icons-right">
+              <input
+                class="input"
+                id="alum_linkedin"
+                type="text"
+                placeholder="linkedin"
+              />
+            </div>
+          </div>
+          <!-- profile photos -->
+          <div class="field m-4">
+            <label class="label">Profile Photo:</label>
+            <div class="control">
+              <input
+                id="profile_photo"
+                class="input"
+                type="file"
+                placeholder="Choose a file"
+              />
+            </div>
+          </div>
+
+          <p class="has-text-centered">
+            <!-- submit and reset buttons -->
+            <input
+              type="submit"
+              value="Submit"
+              id="add_profile_submit_btn"
+              class="button in-primary"
+            />
+            <input type="reset" value="Reset" class="button is-bold" />
+          </p>
+        </form>
+      </div>
+    </div>
+
+    <div id="auth" class="m-2 p-3">
+      <div class="columns">
+        <!-- Unnapproved users -->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Unapproved Users</h1>
+          <div id="unregistered_users"></div>
+        </div>
+
+        <!-- Non-admin users to remove-->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Non-Admin Users (Remove)</h1>
+          <div id="registered_users_remove"></div>
+        </div>
+
+        <!-- Non-admin users to promote-->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Non-Admin Users (Promote)</h1>
+          <div id="registered_users_promote"></div>
+        </div>
+
+        <!-- admin users -->
+        <div class="column custom_columns has-background-danger-light">
+          <h1 class="title">Admin Users</h1>
+          <div id="admin_users"></div>
+        </div>
+      </div>
+    </div>`;
+
+    document.getElementById("main_content").innerHTML = content;
+    document.querySelector("style").innerHTML = style_html;
+    // ADMIN DASHBOARD CODE
+    // fill the admin dashboard
+    fetchUsers();
+
+    //Add Alumni Profile Modal Functionality
+    document.body.addEventListener("click", (event) => {
+      if (event.target && event.target.id === "add_profile_btn") {
+        let addProfileModal = document.querySelector("#add_modal");
+        addProfileModal.classList.add("is-active");
+      }
+    });
+
+    r_e("alumni_form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      let first_name = r_e("alum_first_name").value;
+      let last_name = r_e("alum_last_name").value;
+      let bio = r_e("alum_bio").value;
+      let company = r_e("alum_company").value;
+      let position = r_e("alum_position").value;
+      let major = r_e("alum_major").value;
+      let university = r_e("alum_university").value;
+      let industry = r_e("alum_industry").value;
+      let degree = r_e("alum_degree").value;
+      let city = r_e("alum_city").value;
+      let state = r_e("alum_state").value;
+      let grad_yr = r_e("alum_grad_yr").value;
+      let email = r_e("alum_email").value;
+      let linkedin = r_e("alum_linkedin").value;
+
+      let alum_obj = {
+        first_name: first_name,
+        last_name: last_name,
+        bio: bio,
+        company: company,
+        current_position: position,
+        major: major,
+        university: university,
+        industry: industry,
+        degree: degree,
+        city: city,
+        state: state,
+        graduation_year: grad_yr,
+        contact_info: {
+          email: email,
+          linkedin: linkedin,
+        },
+      };
+
+      //actually inserting into the db collection - alumni!!!
+      try {
+        await db.collection("Alumni").add(alum_obj);
+        alert("alum added successfully");
+      } catch (error) {
+        alert(`${error}`);
+        return;
+      }
+      r_e("alumni_form").reset();
+
+      // Create a new profile card
+      let alumCard = document.createElement("div");
+      alumCard.classList.add("profile-card");
+      alumCard.setAttribute("onclick", "loadPage('expanded')");
+
+      alumCard.innerHTML = `
+    <img src="test.png" class="profile-img" alt="Profile Image" />
+    <h3>${first_name} ${last_name}</h3>
+    <p>${company}</p>
+`;
+
+      // Append the card to the carousel
+      document.querySelector("#carousel").appendChild(alumCard);
+
+      // Reset the form after submitting
+      document.querySelector("#alumni_form").reset();
+      document.querySelector("#add_modal").classList.remove("is-active");
+    });
+
+    // Close modal when clicking on the background for Add Alumni Profile Modal
+    r_e("add_modal").addEventListener("click", (e) => {
+      if (e.target.classList.contains("modal-background")) {
+        r_e("add_modal").classList.remove("is-active");
+        r_e("alumni_form").reset();
+      }
+    });
   }
 }
 
@@ -1545,4 +1812,181 @@ function scrollRight() {
   document
     .getElementById("carousel")
     .scrollBy({ left: 215, behavior: "smooth" });
+}
+
+// on auth state changed
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // Query Firestore for the document with the matching email
+    db.collection("Members")
+      .where("email", "==", user.email)
+      .get()
+      .then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((doc) => {
+            const userData = doc.data();
+            if (userData.role === "admin") {
+              // when signed in, sign up/in buttons disappear and sign out button appears
+              r_e("signupbtn").classList.add("is-hidden");
+              r_e("signinbtn").classList.add("is-hidden");
+              r_e("signoutbtn").classList.remove("is-hidden");
+              // when signed in, dashboard, search page, and admin dashboard no longer hidden
+              r_e("mydashboard").classList.remove("is-hidden");
+              r_e("search_page").classList.remove("is-hidden");
+              r_e("admin_dashboard").classList.remove("is-hidden");
+            } else if (userData.active_status === false) {
+              alert(
+                "Please contact an admin to become approved before you can access site content."
+              );
+              // Sign out the user
+              auth
+                .signOut()
+                .then(() => {
+                  console.log(
+                    "User has been signed out due to inactive status."
+                  );
+                })
+                .catch((error) => {
+                  console.error("Error signing out user:", error);
+                });
+            } else {
+              // when signed in, sign up/in buttons disappear and sign out button appears
+              r_e("signupbtn").classList.add("is-hidden");
+              r_e("signinbtn").classList.add("is-hidden");
+              r_e("signoutbtn").classList.remove("is-hidden");
+              // when signed in, dashboard and search page no longer hidden
+              r_e("mydashboard").classList.remove("is-hidden");
+              r_e("search_page").classList.remove("is-hidden");
+            }
+          });
+        } else {
+          console.error(
+            "No matching document found for the authenticated user."
+          );
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching user document:", error);
+      });
+  } else {
+    console.log("No user is signed in.");
+  }
+});
+
+// admin dashboard global functions
+// functions to change user status
+function approveUser(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ active_status: true })
+    .then(() => {
+      alert("User approved!");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error approving user:", error);
+    });
+}
+
+function makeAdmin(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ role: "admin" })
+    .then(() => {
+      alert("User promoted to Admin!");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error promoting user to Admin:", error);
+    });
+}
+
+function removeUser(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ active_status: false })
+    .then(() => {
+      alert("User removed.");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error removing user:", error);
+    });
+}
+
+function revokeAdmin(userId) {
+  db.collection("Members")
+    .doc(userId)
+    .update({ role: "" })
+    .then(() => {
+      alert("Admin rights revoked!");
+      fetchUsers(); // Refresh the dashboard
+    })
+    .catch((error) => {
+      console.error("Error revoking Admin rights:", error);
+    });
+}
+
+// fill admin dashboard
+function renderUsers(snapshot, elementId, action) {
+  const container = document.getElementById(elementId);
+  let html = "";
+
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    const firstName = data.first_name || "Unknown";
+    const lastName = data.last_name || "Unknown";
+    const email = data.email || "No Email";
+    const role = data.role || "None"; // Fallback if role is undefined
+
+    html += `
+            <p>${firstName} ${lastName} (${email})</p>
+            <button onclick="${action}('${doc.id}')">${action.replace(
+      /([A-Z])/g,
+      " $1"
+    )}</button>
+          `;
+  });
+
+  container.innerHTML = html || "<p>No users found.</p>";
+}
+
+function fetchUsers() {
+  // Clear the columns before re-rendering
+  document.getElementById("unregistered_users").innerHTML = "";
+  document.getElementById("registered_users_remove").innerHTML = "";
+  document.getElementById("registered_users_promote").innerHTML = "";
+  document.getElementById("admin_users").innerHTML = "";
+
+  // Fetch unapproved users
+  db.collection("Members")
+    .where("active_status", "==", false)
+    .get()
+    .then((snapshot) =>
+      renderUsers(snapshot, "unregistered_users", "approveUser")
+    );
+
+  // Fetch non-admin users to remove
+  db.collection("Members")
+    .where("active_status", "==", true)
+    .where("role", "==", "")
+    .get()
+    .then((snapshot) => {
+      renderUsers(snapshot, "registered_users_remove", "removeUser");
+    });
+
+  // Fetch non-admin users to promote
+  db.collection("Members")
+    .where("active_status", "==", true)
+    .where("role", "==", "")
+    .get()
+    .then((snapshot) => {
+      renderUsers(snapshot, "registered_users_promote", "makeAdmin");
+    });
+
+  // Fetch admin users
+  db.collection("Members")
+    .where("role", "==", "admin")
+    .get()
+    .then((snapshot) => renderUsers(snapshot, "admin_users", "revokeAdmin"));
 }
