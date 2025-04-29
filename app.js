@@ -530,11 +530,6 @@ function nextMonth() {
 
 renderCalendar();
 
-//test commit
-function deleteEvent(key, index) {
-  events[key].splice(index, 1);
-}
-
 function loadPage(page, docId = null) {
   let content = "";
   if (page === "dashboard") {
@@ -708,6 +703,7 @@ function loadPage(page, docId = null) {
 
       .event {
         background:rgb(255, 226, 111);
+        color: black;
         padding: 2px;
         margin-top: 5px;
         border-radius: 3px;
