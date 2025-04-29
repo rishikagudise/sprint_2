@@ -16,7 +16,7 @@ async function calendar_test() {
 
   await page.goto("http://127.0.0.1:5501/sprint_2/index.html#"); // replace with published url
 
-  // listen for alertt popup and accept
+  // listen for alert popup and accept
   page.on("dialog", async (dialog) => {
     console.log("Dialog message:", dialog.message());
     await dialog.accept();

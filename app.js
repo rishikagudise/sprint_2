@@ -331,7 +331,7 @@ async function saveEvent() {
       is_virtual: isVirtual,
       location: location,
       name: name,
-      participants: [auth.currentUser.uid], // We'll use uid here
+      participants: [auth.currentUser.uid],
     });
 
     // Add event to user's Member document
