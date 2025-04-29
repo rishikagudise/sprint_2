@@ -1176,7 +1176,7 @@ function loadPage(page, docId = null) {
       <div class="modal-background" id="modalbg"></div>
       <div class="modal-content has-background-white p-4 model-aes">
         <p class="is-size-4 has-text-weight-semibold has-text-centered">
-          Add an Alumni Profile to your Dashboard!
+          Add an Alumni Profile to the Site!
         </p>
         <form id="alumni_form">
           <!-- first name -->
