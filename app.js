@@ -1166,11 +1166,11 @@ function loadPage(page, docId = null) {
         grant them admin privileges.
       </p>
     </div>
-
+<br>
     <a class="button mr-3 custom_db" id="add_profile_btn"
       ><b>Add an Alumni to the Database!</b></a
     >
-
+<br>
     <!-- Add Profile Modal? -->
     <div class="modal" id="add_modal">
       <div class="modal-background" id="modalbg"></div>
