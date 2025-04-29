@@ -5,6 +5,7 @@
 
 const puppeteer = require("puppeteer");
 
+//test 1 - calendar
 async function calendar_test() {
   const browser = await puppeteer.launch({
     headless: false,
@@ -54,3 +55,7 @@ async function calendar_test() {
 }
 
 calendar_test();
+
+//test 2 - adding profile
+
+//test 3 - filtering profiles
