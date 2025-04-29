@@ -1351,18 +1351,7 @@ function loadPage(page, docId = null) {
               />
             </div>
           </div>
-          <!-- profile photos -->
-          <div class="field m-4">
-            <label class="label">Profile Photo:</label>
-            <div class="control">
-              <input
-                id="profile_photo"
-                class="input"
-                type="file"
-                placeholder="Choose a file"
-              />
-            </div>
-          </div>
+          
 
           <p class="has-text-centered">
             <!-- submit and reset buttons -->
