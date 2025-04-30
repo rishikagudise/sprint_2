@@ -1,6 +1,6 @@
 // change directory to current folder in terminal
 //go to sprint_2 directory!!!
-//add this in the terminal once in the sprint_2 directory: python3 -m http.server 5501
+//add this in the terminal once in the sprint_2 directory (this runs on port 5501): python3 -m http.server 5501
 // in another terminal window, cd into sprint_2 folder again and then type this to run test: node test.js
 
 //IMPORTANT NOTE - Make sure to clear out the calander and dashboard before testing!
