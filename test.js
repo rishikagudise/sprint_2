@@ -37,13 +37,19 @@ async function calendar_test() {
 
   await page.click("#submit2");
 
+  await new Promise((r) => setTimeout(r, 2000)); // wait 2 seconds
+
   // Wait for dashboard button to appear and click
   await page.waitForSelector("#mydashboard");
   await page.click("#mydashboard");
 
+  await new Promise((r) => setTimeout(r, 2000)); // wait 2 seconds
+
   // Wait for the current day element to be visible
   await page.waitForSelector(".day.current-day");
   await page.click(".day.current-day");
+
+  await new Promise((r) => setTimeout(r, 2000)); // wait 2 seconds
 
   // Wait for modal input fields
   await page.waitForSelector("#event-name");
@@ -125,4 +131,4 @@ async function add_profile_test() {
 //TO RUN THE ACTUAL TESTS - DO ONE AT A TIME !!!! (comment one out while doing the other!!!)
 
 calendar_test();
-// add_profile_test();
+//`add_profile_test();
