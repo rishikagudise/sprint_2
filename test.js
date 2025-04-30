@@ -115,5 +115,5 @@ async function add_profile_test() {
 
 //TO RUN THE ACTUAL TESTS - DO ONE AT A TIME !!!! (comment one out while doing the other!!!)
 
-calendar_test();
+// calendar_test();
 add_profile_test();
