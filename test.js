@@ -1,6 +1,5 @@
 // change directory to current folder in terminal
 //go to sprint_2 directory!!!
-//add this in the terminal once in the sprint_2 directory (this runs on port 5501): python3 -m http.server 5501
 // in another terminal window, cd into sprint_2 folder again and then type this to run test: node test.js
 
 //IMPORTANT NOTE - Make sure to clear out the calander and dashboard before testing!
@@ -18,7 +17,7 @@ async function calendar_test() {
   });
 
   const page = await browser.newPage();
-  await page.goto("http://127.0.0.1:5501/index.html");
+  await page.goto("https://wibalumnisearch.web.app/#");
 
   // Accept any alert
   page.on("dialog", async (dialog) => {
@@ -71,7 +70,7 @@ async function add_profile_test() {
   });
 
   const page = await browser.newPage();
-  await page.goto("http://127.0.0.1:5501/index.html");
+  await page.goto("https://wibalumnisearch.web.app/#");
 
   // Accept any alert
   page.on("dialog", async (dialog) => {
@@ -120,4 +119,4 @@ async function add_profile_test() {
 //TO RUN THE ACTUAL TESTS - DO ONE AT A TIME !!!! (comment one out while doing the other!!!)
 
 calendar_test();
-//add_profile_test();
+// add_profile_test();
