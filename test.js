@@ -3,6 +3,10 @@
 //add this in the terminal once in the sprint_2 directory: python3 -m http.server 5501
 // in another terminal window, cd into sprint_2 folder again and then type this to run test: node test.js
 
+//IMPORTANT NOTE - Make sure to clear out the calander and dashboard before testing!
+//Username - gudiserishika@wisc.edu
+//Password - Sparkle123*
+
 //import puppeteer
 
 const puppeteer = require("puppeteer");
@@ -115,5 +119,5 @@ async function add_profile_test() {
 
 //TO RUN THE ACTUAL TESTS - DO ONE AT A TIME !!!! (comment one out while doing the other!!!)
 
-// calendar_test();
-add_profile_test();
+calendar_test();
+//add_profile_test();
