@@ -18,13 +18,18 @@ async function calendar_test() {
   });
 
   const page = await browser.newPage();
-  await page.goto("http://127.0.0.1:5501/index.html");
+  await page.goto("http://127.0.0.1:5501/index.html", {
+    waitUntil: "domcontentloaded",
+    timeout: 0,
+  });
 
   // Accept any alert
   page.on("dialog", async (dialog) => {
     console.log("Dialog message:", dialog.message());
     await dialog.accept();
   });
+
+  await new Promise((r) => setTimeout(r, 2000)); // wait 2 seconds
 
   // Wait for sign in button and click
   await page.waitForSelector("#signinbtn");
@@ -71,7 +76,10 @@ async function add_profile_test() {
   });
 
   const page = await browser.newPage();
-  await page.goto("http://127.0.0.1:5501/index.html");
+  await page.goto("http://127.0.0.1:5501/index.html", {
+    waitUntil: "domcontentloaded",
+    timeout: 0,
+  });
 
   // Accept any alert
   page.on("dialog", async (dialog) => {
@@ -95,20 +103,24 @@ async function add_profile_test() {
   await page.type("#grad_filter", "2019");
   await page.type("#company_filter", "PwC");
 
-  await new Promise((r) => setTimeout(r, 50));
-
-  await page.click("#searchBtn");
-
   await new Promise((r) => setTimeout(r, 1000));
 
+  await page.waitForSelector("#searchBtn");
+  await page.click("#searchBtn");
+
+  await new Promise((r) => setTimeout(r, 2000));
+
+  await page.waitForSelector(".profile-card");
   await page.click(".profile-card");
 
-  await new Promise((r) => setTimeout(r, 500));
+  await new Promise((r) => setTimeout(r, 2000));
 
+  await page.waitForSelector("#saveAlumBtn");
   await page.click("#saveAlumBtn");
 
-  await new Promise((r) => setTimeout(r, 500));
+  await new Promise((r) => setTimeout(r, 2000));
 
+  await page.waitForSelector("#mydashboard");
   await page.click("#mydashboard");
 
   // Wait to see result
