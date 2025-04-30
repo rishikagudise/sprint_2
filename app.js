@@ -118,8 +118,6 @@ r_e("sign_in_form").addEventListener("submit", (e) => {
               const data = doc.data();
               const firstName = data.first_name;
               const lastName = data.last_name;
-              //test
-              // console.log(firstName, lastName);
             });
           } else {
             console.warn(
@@ -1053,7 +1051,6 @@ function loadPage(page, docId = null) {
       const company = r_e("company_filter").value.toLowerCase();
       const resultsContainer = r_e("alumni-results");
       resultsContainer.innerHTML = ""; // Clear existing results
-      console.log("clicked");
       db.collection("Alumni")
         .get()
         .then((querySnapshot) => {
@@ -1830,14 +1827,8 @@ auth.onAuthStateChanged((user) => {
               // Sign out the user
               auth
                 .signOut()
-                .then(() => {
-                  console.log(
-                    "User has been signed out due to inactive status."
-                  );
-                })
-                .catch((error) => {
-                  console.error("Error signing out user:", error);
-                });
+                .then(() => {})
+                .catch((error) => {});
             } else {
               // when signed in, sign up/in buttons disappear and sign out button appears
               r_e("signupbtn").classList.add("is-hidden");
@@ -1858,7 +1849,6 @@ auth.onAuthStateChanged((user) => {
         console.error("Error fetching user document:", error);
       });
   } else {
-    console.log("No user is signed in.");
   }
 });
 
