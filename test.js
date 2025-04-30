@@ -1,5 +1,7 @@
 // change directory to current folder in terminal
-// to run - node test.js
+//go to sprint_2 directory!!!
+//add this in the terminal once in the sprint_2 directory: python3 -m http.server 5501
+// in another terminal window, cd into sprint_2 folder again and then type this to run test: node test.js
 
 //import puppeteer
 
@@ -57,65 +59,61 @@ async function calendar_test() {
   await browser.close();
 }
 
+//test 2 - adding profile to user dashboard
+async function add_profile_test() {
+  const browser = await puppeteer.launch({
+    headless: false,
+    slowMo: 50,
+  });
+
+  const page = await browser.newPage();
+  await page.goto("http://127.0.0.1:5501/index.html");
+
+  // Accept any alert
+  page.on("dialog", async (dialog) => {
+    console.log("Dialog message:", dialog.message());
+    await dialog.accept();
+  });
+
+  // Sign in
+  await page.click("#signinbtn");
+  await page.type("#sign_in_email", "gudiserishika@wisc.edu");
+  await page.type("#sign_in_pass", "Sparkle123*");
+  await page.click("#submit2");
+
+  // Navigate to Search Alumni page
+  await page.waitForSelector("#search_page");
+  await page.click("#search_page");
+
+  // Fill out the alumni form
+  await page.waitForSelector("#searchbar");
+
+  await page.type("#grad_filter", "2019");
+  await page.type("#company_filter", "PwC");
+
+  await new Promise((r) => setTimeout(r, 50));
+
+  await page.click("#searchBtn");
+
+  await new Promise((r) => setTimeout(r, 1000));
+
+  await page.click(".profile-card");
+
+  await new Promise((r) => setTimeout(r, 500));
+
+  await page.click("#saveAlumBtn");
+
+  await new Promise((r) => setTimeout(r, 500));
+
+  await page.click("#mydashboard");
+
+  // Wait to see result
+  await new Promise((r) => setTimeout(r, 5000));
+
+  await browser.close();
+}
+
+//TO RUN THE ACTUAL TESTS - DO ONE AT A TIME !!!! (comment one out while doing the other!!!)
+
 calendar_test();
-
-// //test 2 - adding profile
-// async function add_profile_test() {
-//   const browser = await puppeteer.launch({
-//     headless: false,
-//     slowMo: 50,
-//   });
-
-//   const page = await browser.newPage();
-//   await page.goto("http://127.0.0.1:5501/sprint_2/index.html#");
-
-//   // Accept any alert
-//   page.on("dialog", async (dialog) => {
-//     console.log("Dialog message:", dialog.message());
-//     await dialog.accept();
-//   });
-
-//   // Sign in
-//   await page.click("#signinbtn");
-//   await page.type("#sign_in_email", "puppeteer@gmail.com");
-//   await page.type("#sign_in_pass", "puppeteer@gmail.com");
-//   await page.click("#submit2");
-
-//   // Navigate to Search Alumni page
-//   await page.waitForSelector("#search_page");
-//   await page.click("#search_page");
-
-//   // Wait for content to load
-//   await page.waitForSelector("#add_profile_btn");
-//   await page.click("#add_profile_btn");
-
-//   // Fill out the alumni form
-//   await page.waitForSelector("#alumni_form");
-
-//   await page.type("#first_name", "Test");
-//   await page.type("#last_name", "Alumni");
-//   await page.type("#company_name", "Test Company");
-//   await page.type("#position_name", "Analyst");
-//   await page.select("#industry_name", "Finance"); // match option value/text exactly
-//   await page.type("#grad_yr", "2025");
-//   await page.type("#email", "testalum@example.com");
-//   await page.type("#degree", "BS");
-//   await page.type("#major", "Finance");
-//   await page.type("#city", "Madison");
-//   await page.type("#state", "WI");
-//   await page.type("#linkedin", "https://linkedin.com/in/testalum");
-
-//   // Upload photo (skip this if not required for test — must be a valid path)
-//   // const fileInput = await page.$("#profile_photo");
-//   // await fileInput.uploadFile("path/to/local/test.jpg");
-
-//   // Submit the form
-//   await page.click("#add_profile_submit_btn");
-
-//   // Wait to see result
-//   await page.waitForTimeout(3000);
-
-//   await browser.close();
-// }
-
-// add_profile_test();
+add_profile_test();
